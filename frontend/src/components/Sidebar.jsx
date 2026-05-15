@@ -7,6 +7,7 @@ const navItems = [
   { path: '/contracts',          emoji: '📄', label: 'Contracts' },
   { path: '/contracts/generate', emoji: '✨', label: 'Generate Contract' },
   { path: '/invoices',           emoji: '🧾', label: 'Invoices' },
+  { path: '/analytics',          emoji: '📊', label: 'Analytics' },
 ];
 
 const Sidebar = () => {

@@ -32,3 +32,4 @@ export const createInvoice       = (data)        => API.post('/invoices', data);
 export const getInvoices         = ()            => API.get('/invoices');
 export const updateInvoiceStatus = (id, status)  => API.put(`/invoices/${id}/status`, { status });
 export const deleteInvoice       = (id)          => API.delete(`/invoices/${id}`);
+export const getAnalytics = () => API.get('/analytics');
