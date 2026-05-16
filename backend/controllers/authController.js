@@ -53,4 +53,36 @@ const getMe = async (req, res) => {
   res.json(req.user);
 };
 
-module.exports = { register, login, getMe };
+// PUT /api/auth/profile — update profile
+const updateProfile = async (req, res) => {
+  const { name, businessName, phone, address, website, bio, currency } = req.body;
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { name, businessName, phone, address, website, bio, currency },
+    { new: true }
+  ).select('-passwordHash');
+
+  res.json(user);
+};
+
+// PUT /api/auth/change-password
+const changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  const user = await User.findById(req.user._id);
+
+  // Verify current password
+  const isMatch = await user.matchPassword(currentPassword);
+  if (!isMatch) {
+    return res.status(400).json({ message: 'Current password is incorrect' });
+  }
+
+  // Set new password — pre-save hook will hash it
+  user.passwordHash = newPassword;
+  await user.save();
+
+  res.json({ message: 'Password changed successfully!' });
+};
+
+module.exports = { register, login, getMe, updateProfile, changePassword };

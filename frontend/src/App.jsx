@@ -10,8 +10,10 @@ import Contracts        from './pages/Contracts';
 import GenerateContract from './pages/GenerateContract';
 import Proposals        from './pages/Proposals';
 import GenerateProposal from './pages/GenerateProposal';
+import Templates       from './pages/Templates';
 import Invoices         from './pages/Invoices';
 import Analytics        from './pages/Analytics';
+import Profile from './pages/Profile';
 import PublicContract from './pages/PublicContract';
 
 function App() {
@@ -28,8 +30,10 @@ function App() {
           <Route path="/contracts/generate" element={<ProtectedRoute><GenerateContract /></ProtectedRoute>} />
           <Route path="/proposals"          element={<ProtectedRoute><Proposals /></ProtectedRoute>} />
           <Route path="/proposals/generate" element={<ProtectedRoute><GenerateProposal /></ProtectedRoute>} />
+          <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
           <Route path="/invoices"  element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
           <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/contract/public/:token" element={<PublicContract />} />
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>

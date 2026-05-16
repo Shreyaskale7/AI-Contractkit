@@ -43,3 +43,14 @@ export const getProposals          = ()            => API.get('/proposals');
 export const getProposalById       = (id)          => API.get(`/proposals/${id}`);
 export const updateProposalStatus  = (id, status)  => API.put(`/proposals/${id}/status`, { status });
 export const deleteProposal        = (id)          => API.delete(`/proposals/${id}`);
+
+// TEMPLATES
+export const getTemplates           = (category)  => API.get(`/templates${category ? `?category=${category}` : ''}`);
+export const getTemplateById        = (id)        => API.get(`/templates/${id}`);
+export const createTemplate         = (data)      => API.post('/templates', data);
+export const saveContractAsTemplate = (id, data)  => API.post(`/templates/from-contract/${id}`, data);
+export const deleteTemplate         = (id)        => API.delete(`/templates/${id}`);
+
+// PROFILE
+export const updateProfile    = (data) => API.put('/auth/profile', data);
+export const changePassword   = (data) => API.put('/auth/change-password', data);

@@ -13,6 +13,11 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
   businessName: { type: String, default: '' },
   logo:         { type: String, default: '' }, // Cloudinary URL later
+  phone:        { type: String, default: '' },        // ← add
+  address:      { type: String, default: '' },        // ← add
+  website:      { type: String, default: '' },        // ← add
+  bio:          { type: String, default: '' },        // ← add
+  currency:     { type: String, default: 'INR' },
 }, { timestamps: true }); // adds createdAt + updatedAt automatically
 
 // INSTANCE METHOD: call user.matchPassword(enteredPassword) to verify login

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
-import { getContracts, deleteContract } from '../services/api';
+import { getContracts, deleteContract, saveContractAsTemplate } from '../services/api';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -75,6 +75,19 @@ const Contracts = () => {
                     }}
                     style={{ background:'#eef2ff', color:'#4f46e5', border:'none', borderRadius:8, padding:'8px 14px', cursor:'pointer', fontSize:13 }}>
                     🔗 Share
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const category = prompt('Select category:\n1. Web Development\n2. Mobile Development\n3. Design\n4. Content Writing\n5. Consulting\n6. Other\n\nType the category name:') || 'Other';
+                      try {
+                        await saveContractAsTemplate(contract._id, { category });
+                        toast.success('Saved as template! 📋');
+                      } catch {
+                        toast.error('Failed to save template');
+                      }
+                    }}
+                    style={{ background:'#f0fdf4', color:'#16a34a', border:'none', borderRadius:8, padding:'8px 14px', cursor:'pointer', fontSize:13 }}>
+                    📋 Save Template
                   </button>
                 </div>
               </div>

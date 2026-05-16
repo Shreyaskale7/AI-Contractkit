@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import { generateContract, getClients } from '../services/api';
+import { useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 const GenerateContract = () => {
@@ -8,10 +9,21 @@ const GenerateContract = () => {
   const [loading, setLoading]   = useState(false);
   const [result, setResult]     = useState(null);
   const [form, setForm]         = useState({ prompt:'', clientId:'', title:'' });
+  const location = useLocation();
 
   useEffect(() => {
     getClients().then(res => setClients(res.data)).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (location.state?.prefillPrompt) {
+      setForm(prev => ({
+        ...prev,
+        prompt: location.state.prefillPrompt,
+        title:  location.state.prefillTitle || '',
+      }));
+    }
+  }, [location.state]);
 
   const handleGenerate = async (e) => {
     e.preventDefault();

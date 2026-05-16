@@ -8,8 +8,10 @@ const navItems = [
   { path: '/contracts/generate', emoji: '✨', label: 'Generate Contract' },
   { path: '/proposals',          emoji: '📋', label: 'Proposals' },
   { path: '/proposals/generate', emoji: '🤖', label: 'Generate Proposal' },
+  { path: '/templates',          emoji: '📋', label: 'Templates' },
   { path: '/invoices',           emoji: '🧾', label: 'Invoices' },
   { path: '/analytics',          emoji: '📊', label: 'Analytics' },
+  { path: '/profile',            emoji: '⚙️', label: 'Settings' },
 ];
 
 const Sidebar = () => {
