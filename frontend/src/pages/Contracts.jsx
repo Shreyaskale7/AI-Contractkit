@@ -67,6 +67,15 @@ const Contracts = () => {
                     style={{ background:'#fef2f2', color:'#dc2626', border:'none', borderRadius:8, padding:'8px 14px', cursor:'pointer', fontSize:13 }}>
                     🗑 Delete
                   </button>
+                  <button
+                    onClick={() => {
+                      const url = `${window.location.origin}/contract/public/${contract.publicToken}`;
+                      navigator.clipboard.writeText(url);
+                      toast.success('Public link copied! 🔗');
+                    }}
+                    style={{ background:'#eef2ff', color:'#4f46e5', border:'none', borderRadius:8, padding:'8px 14px', cursor:'pointer', fontSize:13 }}>
+                    🔗 Share
+                  </button>
                 </div>
               </div>
             ))}

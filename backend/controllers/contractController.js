@@ -119,17 +119,61 @@ const getContractById = async (req, res) => {
   res.json(contract);
 };
 
-const getPublicContract = async (req, res) => {
-  const contract = await Contract.findOne({ publicToken: req.params.token })
-    .populate('clientId', 'name email company')
-    .populate('userId', 'name businessName');
-  if (!contract) return res.status(404).json({ message: 'Contract not found' });
-  res.json(contract);
-};
-
 const deleteContract = async (req, res) => {
   await Contract.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
   res.json({ message: 'Contract deleted' });
+};
+
+// POST /api/contracts/:id/sign — save signature
+const signContract = async (req, res) => {
+  const { signatureData, signerName, signerEmail } = req.body;
+
+  if (!signatureData) {
+    return res.status(400).json({ message: 'Signature data is required' });
+  }
+
+  // Get client IP address
+  const ip = req.headers['x-forwarded-for'] || 
+             req.connection.remoteAddress || 
+             'Unknown';
+
+  const contract = await Contract.findOneAndUpdate(
+    { publicToken: req.params.token },
+    {
+      signature: {
+        data:        signatureData,  // base64 image
+        signedAt:    new Date(),
+        ip:          ip,
+        signerName:  signerName || 'Client',
+        signerEmail: signerEmail || '',
+      },
+      status: 'signed'
+    },
+    { new: true }
+  );
+
+  if (!contract) {
+    return res.status(404).json({ message: 'Contract not found' });
+  }
+
+  res.json({
+    message: 'Contract signed successfully!',
+    signedAt: contract.signature.signedAt,
+    contract,
+  });
+};
+
+// GET /api/contracts/public/:token — public view
+const getPublicContract = async (req, res) => {
+  const contract = await Contract.findOne({ publicToken: req.params.token })
+    .populate('clientId', 'name email company')
+    .populate('userId', 'name businessName email');
+
+  if (!contract) {
+    return res.status(404).json({ message: 'Contract not found' });
+  }
+
+  res.json(contract);
 };
 
 module.exports = {
@@ -137,5 +181,6 @@ module.exports = {
   getContracts,
   getContractById,
   getPublicContract,
+  signContract,
   deleteContract
 };

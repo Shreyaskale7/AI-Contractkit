@@ -1,23 +1,24 @@
-// backend/routes/contractRoutes.js
 const express = require('express');
-const router = express.Router();
+const router  = express.Router();
 const {
   generateContract,
   getContracts,
   getContractById,
   getPublicContract,
+  signContract,
   deleteContract
 } = require('../controllers/contractController');
 const { protect } = require('../middleware/authMiddleware');
 
-// Public route — no token needed (for client to view and sign)
-router.get('/public/:token', getPublicContract);
+// ── Public routes (no auth needed) ──
+router.get('/public/:token',  getPublicContract);
+router.post('/sign/:token',   signContract);
 
-// Protected routes — must be logged in
+// ── Protected routes ──
 router.use(protect);
-router.post('/generate', generateContract);
-router.get('/', getContracts);
-router.get('/:id', getContractById);
-router.delete('/:id', deleteContract);
+router.post('/generate',  generateContract);
+router.get('/',           getContracts);
+router.get('/:id',        getContractById);
+router.delete('/:id',     deleteContract);
 
 module.exports = router;
