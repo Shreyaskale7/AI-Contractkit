@@ -6,6 +6,8 @@ const navItems = [
   { path: '/clients',            emoji: '👥', label: 'Clients' },
   { path: '/contracts',          emoji: '📄', label: 'Contracts' },
   { path: '/contracts/generate', emoji: '✨', label: 'Generate Contract' },
+  { path: '/proposals',          emoji: '📋', label: 'Proposals' },
+  { path: '/proposals/generate', emoji: '🤖', label: 'Generate Proposal' },
   { path: '/invoices',           emoji: '🧾', label: 'Invoices' },
   { path: '/analytics',          emoji: '📊', label: 'Analytics' },
 ];

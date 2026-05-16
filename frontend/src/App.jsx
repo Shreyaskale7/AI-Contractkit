@@ -8,8 +8,10 @@ import Dashboard        from './pages/Dashboard';
 import Clients          from './pages/Clients';
 import Contracts        from './pages/Contracts';
 import GenerateContract from './pages/GenerateContract';
+import Proposals        from './pages/Proposals';
+import GenerateProposal from './pages/GenerateProposal';
 import Invoices         from './pages/Invoices';
-import Analytics        from './pages/Analytics';   // ← ADD THIS LINE
+import Analytics        from './pages/Analytics';
 import PublicContract from './pages/PublicContract';
 
 function App() {
@@ -24,6 +26,8 @@ function App() {
           <Route path="/clients"   element={<ProtectedRoute><Clients /></ProtectedRoute>} />
           <Route path="/contracts" element={<ProtectedRoute><Contracts /></ProtectedRoute>} />
           <Route path="/contracts/generate" element={<ProtectedRoute><GenerateContract /></ProtectedRoute>} />
+          <Route path="/proposals"          element={<ProtectedRoute><Proposals /></ProtectedRoute>} />
+          <Route path="/proposals/generate" element={<ProtectedRoute><GenerateProposal /></ProtectedRoute>} />
           <Route path="/invoices"  element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
           <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
           <Route path="/contract/public/:token" element={<PublicContract />} />

@@ -36,3 +36,10 @@ export const getAnalytics = () => API.get('/analytics');
 // Add these 2 lines at the bottom
 export const getPublicContract = (token) => API.get(`/contracts/public/${token}`);
 export const signContract      = (token, data) => API.post(`/contracts/sign/${token}`, data);
+
+// PROPOSALS
+export const generateProposal      = (data)        => API.post('/proposals/generate', data);
+export const getProposals          = ()            => API.get('/proposals');
+export const getProposalById       = (id)          => API.get(`/proposals/${id}`);
+export const updateProposalStatus  = (id, status)  => API.put(`/proposals/${id}/status`, { status });
+export const deleteProposal        = (id)          => API.delete(`/proposals/${id}`);
