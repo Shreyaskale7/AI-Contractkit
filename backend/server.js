@@ -37,6 +37,7 @@ app.use('/api/invoices',  require('./routes/invoiceRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
 app.use('/api/proposals', require('./routes/proposalRoutes'));
 app.use('/api/templates', require('./routes/templateRoutes'));
+app.use('/api/rag', require('./routes/ragRoutes'));
 // Health check route — visit localhost:5000 to confirm server is running
 app.get('/', (req, res) => res.send('AI ContractKit API is running ✅'));
 

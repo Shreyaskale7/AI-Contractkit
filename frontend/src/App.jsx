@@ -10,6 +10,7 @@ import Contracts        from './pages/Contracts';
 import GenerateContract from './pages/GenerateContract';
 import Proposals        from './pages/Proposals';
 import GenerateProposal from './pages/GenerateProposal';
+import Training         from './pages/Training';
 import Templates       from './pages/Templates';
 import Invoices         from './pages/Invoices';
 import Analytics        from './pages/Analytics';
@@ -30,6 +31,7 @@ function App() {
           <Route path="/contracts/generate" element={<ProtectedRoute><GenerateContract /></ProtectedRoute>} />
           <Route path="/proposals"          element={<ProtectedRoute><Proposals /></ProtectedRoute>} />
           <Route path="/proposals/generate" element={<ProtectedRoute><GenerateProposal /></ProtectedRoute>} />
+          <Route path="/training"          element={<ProtectedRoute><Training /></ProtectedRoute>} />
           <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
           <Route path="/invoices"  element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
           <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />

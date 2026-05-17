@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
-import { generateContract, getClients } from '../services/api';
+import { generateContract, generateWithRAG, getClients } from '../services/api';
 import { useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -9,6 +9,7 @@ const GenerateContract = () => {
   const [loading, setLoading]   = useState(false);
   const [result, setResult]     = useState(null);
   const [form, setForm]         = useState({ prompt:'', clientId:'', title:'' });
+  const [useRAG, setUseRAG]     = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -30,9 +31,14 @@ const GenerateContract = () => {
     if (!form.clientId) return toast.error('Please select a client');
     setLoading(true); setResult(null);
     try {
-      const res = await generateContract(form);
+      const fn  = useRAG ? generateWithRAG : generateContract;
+      const res = await fn(form);
       setResult(res.data);
-      toast.success('Contract generated!');
+      if (res.data.usedRAG) {
+        toast.success(`🧠 Used ${res.data.referencesUsed} similar contracts as reference!`);
+      } else {
+        toast.success('Contract generated!');
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Generation failed');
     } finally { setLoading(false); }
@@ -73,6 +79,25 @@ const GenerateContract = () => {
                 rows={4} placeholder="e.g. Create a freelance app development contract for ₹75,000 with 3 milestones and 2 revisions for an e-commerce mobile app..."
                 style={{ width:'100%', border:'1px solid #e2e8f0', borderRadius:8, padding:'10px 14px', fontSize:14, outline:'none', boxSizing:'border-box', resize:'vertical' }}
               />
+            </div>
+
+            <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:16, padding:'12px 14px', background:'#eef2ff', borderRadius:8, border:'1px solid #c7d2fe' }}>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:13, fontWeight:600, color:'#4f46e5' }}>🧠 Smart Learning Mode</div>
+                <div style={{ fontSize:12, color:'#6366f1', marginTop:2 }}>
+                  {useRAG ? 'AI will learn from your previous contracts' : 'Standard AI generation'}
+                </div>
+              </div>
+              <div onClick={() => setUseRAG(!useRAG)} style={{
+                width:44, height:24, borderRadius:20, cursor:'pointer', transition:'all 0.2s',
+                background: useRAG ? '#4f46e5' : '#e2e8f0', position:'relative'
+              }}>
+                <div style={{
+                  width:18, height:18, borderRadius:'50%', background:'white',
+                  position:'absolute', top:3, transition:'all 0.2s',
+                  left: useRAG ? 23 : 3, boxShadow:'0 1px 3px rgba(0,0,0,0.2)'
+                }} />
+              </div>
             </div>
 
             <button type="submit" disabled={loading}

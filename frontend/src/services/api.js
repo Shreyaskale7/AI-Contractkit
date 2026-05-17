@@ -54,3 +54,8 @@ export const deleteTemplate         = (id)        => API.delete(`/templates/${id
 // PROFILE
 export const updateProfile    = (data) => API.put('/auth/profile', data);
 export const changePassword   = (data) => API.put('/auth/change-password', data);
+
+export const generateWithRAG   = (data) => API.post('/rag/generate', data);
+export const indexAllContracts = ()     => API.post('/rag/index-all');
+export const uploadContracts   = (data) => API.post('/rag/upload', data);
+export const getRAGStats       = ()     => API.get('/rag/stats');
