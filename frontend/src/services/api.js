@@ -26,6 +26,7 @@ export const generateContract = (data) => API.post('/contracts/generate', data);
 export const getContracts     = ()     => API.get('/contracts');
 export const getContractById  = (id)   => API.get(`/contracts/${id}`);
 export const deleteContract   = (id)   => API.delete(`/contracts/${id}`);
+export const refineContract   = (id, data) => API.post(`/contracts/${id}/refine`, data);
 
 // INVOICES
 export const createInvoice       = (data)        => API.post('/invoices', data);

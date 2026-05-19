@@ -6,7 +6,8 @@ const {
   getContractById,
   getPublicContract,
   signContract,
-  deleteContract
+  deleteContract,
+  refineContract
 } = require('../controllers/contractController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -19,6 +20,7 @@ router.use(protect);
 router.post('/generate',  generateContract);
 router.get('/',           getContracts);
 router.get('/:id',        getContractById);
+router.post('/:id/refine', refineContract);
 router.delete('/:id',     deleteContract);
 
 module.exports = router;

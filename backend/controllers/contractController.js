@@ -176,11 +176,41 @@ const getPublicContract = async (req, res) => {
   res.json(contract);
 };
 
+const refineContract = async (req, res) => {
+  const { instruction } = req.body;
+  const contract = await Contract.findOne({ _id: req.params.id, userId: req.user._id });
+  if (!contract) return res.status(404).json({ message: 'Contract not found' });
+
+  const groq = require('../config/groq');
+  const completion = await groq.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    messages: [
+      {
+        role: 'system',
+        content: `You are a contract editor. Receive an existing HTML contract and an instruction.
+Make ONLY the requested change. Keep everything else exactly the same.
+Return the complete updated contract HTML — nothing else.`
+      },
+      {
+        role: 'user',
+        content: `Contract:\n${contract.content}\n\nInstruction: ${instruction}\n\nReturn complete updated HTML.`
+      }
+    ],
+    max_tokens: 3000,
+    temperature: 0.3,
+  });
+
+  contract.content = completion.choices[0].message.content;
+  await contract.save();
+  res.json({ content: contract.content, message: 'Contract updated!' });
+};
+
 module.exports = {
   generateContract,
   getContracts,
   getContractById,
   getPublicContract,
   signContract,
-  deleteContract
+  deleteContract,
+  refineContract
 };

@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const navItems = [
   { path: '/dashboard',          icon: '⊞', label: 'Dashboard' },
@@ -18,6 +19,7 @@ const navItems = [
 const Sidebar = () => {
   const { pathname }         = useLocation();
   const { user, logoutUser } = useAuth();
+  const { dark, toggleDark } = useTheme();
   const navigate             = useNavigate();
 
   const handleLogout = () => { logoutUser(); navigate('/login'); };
@@ -77,6 +79,15 @@ const Sidebar = () => {
 
       {/* Logout */}
       <div style={{ padding: '12px 10px', borderTop: '1px solid #1e293b' }}>
+        <button onClick={toggleDark} style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '9px 12px', borderRadius: 8, width: '100%',
+          fontSize: 13, color: '#94a3b8',
+          background: 'none', border: 'none', cursor: 'pointer',
+          marginBottom: 4,
+        }}>
+          {dark ? '☀️ Light Mode' : '🌙 Dark Mode'}
+        </button>
         <button onClick={handleLogout} style={{
           display: 'flex', alignItems: 'center', gap: 10,
           padding: '9px 12px', borderRadius: 8, width: '100%',

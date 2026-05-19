@@ -1,15 +1,23 @@
 import { useState, useEffect } from 'react';
-import Sidebar from '../components/Sidebar';
-import { generateContract, generateWithRAG, getClients } from '../services/api';
 import { useLocation } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
+import ContractCustomizer from '../components/ContractCustomizer';
+import { generateContract, getClients, refineContract } from '../services/api';
 import toast from 'react-hot-toast';
 
 const GenerateContract = () => {
   const [clients, setClients]   = useState([]);
   const [loading, setLoading]   = useState(false);
   const [result, setResult]     = useState(null);
-  const [form, setForm]         = useState({ prompt:'', clientId:'', title:'' });
-  const [useRAG, setUseRAG]     = useState(false);
+  const [form, setForm]         = useState({ prompt: '', clientId: '', title: '' });
+  const [refineInput, setRefineInput]     = useState('');
+  const [refining, setRefining]           = useState(false);
+  const [refineHistory, setRefineHistory] = useState([]);
+  const [contractStyle, setContractStyle] = useState({
+    font: 'Georgia, serif', theme: 'white',
+    themeBg: '#ffffff', themeColor: '#1a1a1a',
+    themeBorder: '#e2e8f0', size: 14, spacing: 1.8,
+  });
   const location = useLocation();
 
   useEffect(() => {
@@ -31,18 +39,51 @@ const GenerateContract = () => {
     if (!form.clientId) return toast.error('Please select a client');
     setLoading(true); setResult(null);
     try {
-      const fn  = useRAG ? generateWithRAG : generateContract;
-      const res = await fn(form);
+      const res = await generateContract(form);
       setResult(res.data);
-      if (res.data.usedRAG) {
-        toast.success(`🧠 Used ${res.data.referencesUsed} similar contracts as reference!`);
-      } else {
-        toast.success('Contract generated!');
-      }
+      toast.success('Contract generated! 🎉');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Generation failed');
     } finally { setLoading(false); }
   };
+
+  const handleRefine = async () => {
+    if (!refineInput.trim() || !result?._id) return;
+    setRefining(true);
+    try {
+      const res = await refineContract(result._id, { instruction: refineInput });
+      setResult(prev => ({ ...prev, content: res.data.content }));
+      setRefineHistory(prev => [...prev, refineInput]);
+      setRefineInput('');
+      toast.success('Contract updated! ✅');
+    } catch {
+      toast.error('Failed to refine');
+    } finally { setRefining(false); }
+  };
+
+  const handlePrint = () => {
+    const win = window.open('', '_blank');
+    win.document.write(`<html><head><title>${result.title}</title>
+      <style>
+        body { font-family: ${contractStyle.font}; max-width: 800px; margin: 40px auto; padding: 40px; color: ${contractStyle.themeColor}; background: ${contractStyle.themeBg}; font-size: ${contractStyle.size}px; line-height: ${contractStyle.spacing}; }
+        h2 { text-transform: uppercase; font-size: 14px; letter-spacing: 1px; border-bottom: 2px solid #4f46e5; padding-bottom: 6px; margin-top: 24px; }
+        p { line-height: ${contractStyle.spacing}; text-align: justify; }
+      </style>
+    </head><body>${result.content}</body></html>`);
+    win.document.close();
+    win.print();
+  };
+
+  const inputStyle = { width: '100%', border: '1px solid #e2e8f0', borderRadius: 8, padding: '10px 14px', fontSize: 14, outline: 'none', boxSizing: 'border-box' };
+
+  const quickSuggestions = [
+    'Add a late payment penalty of 2% per month',
+    'Make revision policy stricter — max 1 round',
+    'Add a force majeure clause',
+    'Increase notice period to 30 days',
+    'Add a non-disclosure clause',
+    'Change payment to 50% upfront',
+  ];
 
   return (
     <div style={{ display:'flex' }}>
@@ -81,27 +122,14 @@ const GenerateContract = () => {
               />
             </div>
 
-            <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:16, padding:'12px 14px', background:'#eef2ff', borderRadius:8, border:'1px solid #c7d2fe' }}>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:13, fontWeight:600, color:'#4f46e5' }}>🧠 Smart Learning Mode</div>
-                <div style={{ fontSize:12, color:'#6366f1', marginTop:2 }}>
-                  {useRAG ? 'AI will learn from your previous contracts' : 'Standard AI generation'}
-                </div>
-              </div>
-              <div onClick={() => setUseRAG(!useRAG)} style={{
-                width:44, height:24, borderRadius:20, cursor:'pointer', transition:'all 0.2s',
-                background: useRAG ? '#4f46e5' : '#e2e8f0', position:'relative'
-              }}>
-                <div style={{
-                  width:18, height:18, borderRadius:'50%', background:'white',
-                  position:'absolute', top:3, transition:'all 0.2s',
-                  left: useRAG ? 23 : 3, boxShadow:'0 1px 3px rgba(0,0,0,0.2)'
-                }} />
-              </div>
-            </div>
+            <ContractCustomizer
+              style={contractStyle}
+              onChange={setContractStyle}
+              contractType={result?.category || 'other'}
+            />
 
             <button type="submit" disabled={loading}
-              style={{ background:'#4f46e5', color:'white', border:'none', borderRadius:8, padding:'12px 32px', fontSize:15, fontWeight:600, cursor:'pointer', opacity: loading ? 0.7 : 1 }}>
+              style={{ width:'100%', background:'linear-gradient(135deg,#6366f1,#8b5cf6)', color:'white', border:'none', borderRadius:8, padding:'12px', fontSize:15, fontWeight:600, cursor:'pointer', opacity: loading ? 0.7 : 1, boxShadow:'0 4px 14px rgba(99,102,241,0.3)' }}>
               {loading ? '⏳ Generating contract...' : '✨ Generate Contract'}
             </button>
           </form>
@@ -174,6 +202,40 @@ const GenerateContract = () => {
               style={{ border:'1px solid #e2e8f0', borderRadius:8, padding:40, maxHeight:600, overflowY:'auto', background:'#fffef9', boxShadow:'inset 0 0 0 1px #f0ede0' }}
               dangerouslySetInnerHTML={{ __html: result.content }}
             />
+
+            <div style={{ background: 'white', borderRadius: 12, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.08)', border: '1px solid #f1f5f9', marginTop: 16 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, color: '#0f172a' }}>🤖 Refine Contract</h3>
+              <p style={{ fontSize: 12, color: '#94a3b8', marginBottom: 12 }}>Tell the AI what to change — it updates only that part.</p>
+
+              {refineHistory.length > 0 && (
+                <div style={{ marginBottom: 10, padding: '8px 12px', background: '#f8fafc', borderRadius: 8 }}>
+                  {refineHistory.map((h, i) => (
+                    <div key={i} style={{ fontSize: 12, color: '#64748b', padding: '2px 0' }}>✅ {h}</div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+                {quickSuggestions.map(s => (
+                  <button key={s} type="button" onClick={() => setRefineInput(s)}
+                    style={{ fontSize: 11, padding: '4px 10px', borderRadius: 20, border: '1px solid #e2e8f0', background: '#f8fafc', color: '#64748b', cursor: 'pointer' }}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <input value={refineInput} onChange={e => setRefineInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleRefine()}
+                  placeholder='e.g. "Add a penalty clause" or "Make payment terms stricter"'
+                  style={{ flex: 1, border: '1px solid #e2e8f0', borderRadius: 8, padding: '10px 14px', fontSize: 13, outline: 'none' }}
+                />
+                <button onClick={handleRefine} disabled={refining || !refineInput.trim()} type="button"
+                  style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: 'white', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: refining || !refineInput.trim() ? 0.6 : 1, whiteSpace: 'nowrap' }}>
+                  {refining ? '⏳' : '✏️ Apply'}
+                </button>
+              </div>
+            </div>
 
             <div style={{ marginTop:16, padding:12, background:'#f8fafc', borderRadius:8, fontSize:12, color:'#94a3b8' }}>
               🔗 Public Link: <span style={{ fontFamily:'monospace', color:'#4f46e5' }}>localhost:5000/api/contracts/public/{result.publicToken}</span>

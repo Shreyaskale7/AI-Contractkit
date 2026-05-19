@@ -1,53 +1,51 @@
 @import "tailwindcss";
 
+:root {
+  --bg-primary:    #f8fafc;
+  --bg-secondary:  #ffffff;
+  --bg-tertiary:   #f1f5f9;
+  --text-primary:  #0f172a;
+  --text-secondary:#64748b;
+  --text-tertiary: #94a3b8;
+  --border:        #e2e8f0;
+  --accent:        #6366f1;
+  --shadow:        0 1px 3px rgba(0,0,0,0.08);
+}
+
+[data-theme="dark"] {
+  --bg-primary:    #0f172a;
+  --bg-secondary:  #1e293b;
+  --bg-tertiary:   #334155;
+  --text-primary:  #f1f5f9;
+  --text-secondary:#94a3b8;
+  --text-tertiary: #64748b;
+  --border:        #334155;
+  --accent:        #818cf8;
+  --shadow:        0 1px 3px rgba(0,0,0,0.3);
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #f8fafc;
-  color: #1e293b;
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background 0.3s, color 0.3s;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
-
-input, select, textarea, button { font-family: inherit; }
-
-a { text-decoration: none; }
-
-table { border-collapse: collapse; }
-
-::selection { background: #6366f1; color: white; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+button:active { transform: scale(0.97); }
 
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
-/* Button press effect */
-button:active { transform: scale(0.97); }
-
-/* Card hover lift */
-.card-hover {
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-}
-
-/* Smooth page fade */
-.page-enter {
-  animation: fadeIn 0.3s ease;
-}
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Sidebar link transition */
-nav a div { transition: all 0.15s ease; }
+.page-enter { animation: fadeIn 0.25s ease; }
