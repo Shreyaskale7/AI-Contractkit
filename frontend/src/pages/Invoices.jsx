@@ -1,199 +1,192 @@
-import { useState, useEffect } from 'react';
-import Sidebar from '../components/Sidebar';
+﻿import { useState, useEffect } from 'react';
+import PageShell from '../components/PageShell';
 import { getInvoices, createInvoice, updateInvoiceStatus, deleteInvoice, getClients } from '../services/api';
 import toast from 'react-hot-toast';
 
-const statusMap = {
-  unpaid:  { bg: '#fffbeb', color: '#d97706', label: 'Unpaid'  },
-  paid:    { bg: '#f0fdf4', color: '#16a34a', label: 'Paid'    },
-  overdue: { bg: '#fef2f2', color: '#dc2626', label: 'Overdue' },
-};
+const statusClass = { unpaid: 'badge-sent', paid: 'badge-paid', overdue: 'badge-overdue' };
+const statusLabel = { unpaid: 'Unpaid', paid: 'Paid', overdue: 'Overdue' };
 
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
-  const [clients, setClients]   = useState([]);
+  const [clients, setClients] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading]   = useState(true);
-  const [saving, setSaving]     = useState(false);
-  const [filter, setFilter]     = useState('All');
-  const [form, setForm]         = useState({ clientId: '', dueDate: '', currency: 'INR', notes: '', items: [{ description: '', quantity: 1, rate: 0 }] });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [filter, setFilter] = useState('All');
+  const [form, setForm] = useState({ clientId: '', dueDate: '', currency: 'INR', notes: '', items: [{ description: '', quantity: 1, rate: 0 }] });
 
   const fetchAll = async () => {
     try {
       const [inv, cli] = await Promise.all([getInvoices(), getClients()]);
-      setInvoices(inv.data); setClients(cli.data);
-    } catch { toast.error('Failed to load'); }
-    finally { setLoading(false); }
+      setInvoices(inv.data);
+      setClients(cli.data);
+    } catch {
+      toast.error('Failed to load');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchAll(); }, []);
 
-  const addItem    = () => setForm({ ...form, items: [...form.items, { description: '', quantity: 1, rate: 0 }] });
-  const removeItem = (i) => setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
-  const updateItem = (i, field, val) => {
+  const addItem = () => setForm({ ...form, items: [...form.items, { description: '', quantity: 1, rate: 0 }] });
+  const removeItem = (index) => setForm({ ...form, items: form.items.filter((_, i) => i !== index) });
+  const updateItem = (index, field, value) => {
     const items = [...form.items];
-    items[i] = { ...items[i], [field]: field === 'description' ? val : Number(val) };
+    items[index] = { ...items[index], [field]: field === 'description' ? value : Number(value) };
     setForm({ ...form, items });
   };
 
-  const total = form.items.reduce((s, item) => s + (item.quantity * item.rate), 0);
+  const total = form.items.reduce((sum, item) => sum + item.quantity * item.rate, 0);
 
   const handleCreate = async (e) => {
-    e.preventDefault(); setSaving(true);
+    e.preventDefault();
+    setSaving(true);
     try {
       await createInvoice(form);
       toast.success('Invoice created!');
       setShowForm(false);
       setForm({ clientId: '', dueDate: '', currency: 'INR', notes: '', items: [{ description: '', quantity: 1, rate: 0 }] });
       fetchAll();
-    } catch { toast.error('Failed to create invoice'); }
-    finally { setSaving(false); }
+    } catch {
+      toast.error('Failed to create invoice');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleStatus = async (id, status) => {
-    try { await updateInvoiceStatus(id, status); toast.success('Updated!'); fetchAll(); }
-    catch { toast.error('Failed to update'); }
+    try {
+      await updateInvoiceStatus(id, status);
+      toast.success('Updated!');
+      fetchAll();
+    } catch {
+      toast.error('Failed to update');
+    }
   };
 
   const handleDelete = async (id) => {
     if (!confirm('Delete invoice?')) return;
-    try { await deleteInvoice(id); toast.success('Deleted!'); fetchAll(); }
-    catch { toast.error('Failed to delete'); }
+    try {
+      await deleteInvoice(id);
+      toast.success('Deleted!');
+      fetchAll();
+    } catch {
+      toast.error('Failed to delete');
+    }
   };
 
-  const filtered = filter === 'All' ? invoices : invoices.filter(i => i.status === filter.toLowerCase());
-  const inputStyle = { border: '1px solid #e2e8f0', borderRadius: 6, padding: '8px 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box', background: 'white' };
+  const filtered = filter === 'All' ? invoices : invoices.filter((invoice) => invoice.status === filter.toLowerCase());
 
   return (
-    <div style={{ display: 'flex', background: '#f8fafc', minHeight: '100vh' }}>
-      <Sidebar />
-      <main style={{ marginLeft: 220, flex: 1, padding: '32px 40px' }}>
-
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>Invoices</h1>
-            <p style={{ fontSize: 14, color: '#64748b' }}>{invoices.length} total invoices</p>
-          </div>
-          <button onClick={() => setShowForm(!showForm)}
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none', borderRadius: 10, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 14px rgba(99,102,241,0.3)' }}>
-            + Create New Invoice
-          </button>
-        </div>
-
-        {/* Create Invoice Form */}
-        {showForm && (
-          <div style={{ background: 'white', borderRadius: 12, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.08)', border: '1px solid #f1f5f9', marginBottom: 20 }}>
-            <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 20, color: '#0f172a' }}>New Invoice</h2>
-            <form onSubmit={handleCreate}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16 }}>
-                <div>
-                  <label style={{ fontSize: 12, color: '#64748b', display: 'block', marginBottom: 4 }}>Client *</label>
-                  <select required value={form.clientId} onChange={e => setForm({ ...form, clientId: e.target.value })} style={{ ...inputStyle, width: '100%' }}>
-                    <option value="">Select client...</option>
-                    {clients.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, color: '#64748b', display: 'block', marginBottom: 4 }}>Due Date *</label>
-                  <input required type="date" value={form.dueDate} onChange={e => setForm({ ...form, dueDate: e.target.value })} style={{ ...inputStyle, width: '100%' }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, color: '#64748b', display: 'block', marginBottom: 4 }}>Currency</label>
-                  <select value={form.currency} onChange={e => setForm({ ...form, currency: e.target.value })} style={{ ...inputStyle, width: '100%' }}>
-                    <option value="INR">INR ₹</option>
-                    <option value="USD">USD $</option>
-                    <option value="EUR">EUR €</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <label style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>Line Items</label>
-                </div>
-                <div style={{ background: '#f8fafc', borderRadius: 8, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1fr 1fr auto', padding: '8px 12px', background: '#f1f5f9' }}>
-                    {['Description', 'Qty', 'Rate', 'Total', ''].map(h => (
-                      <div key={h} style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' }}>{h}</div>
-                    ))}
-                  </div>
-                  {form.items.map((item, i) => (
-                    <div key={i} style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1fr 1fr auto', padding: '8px 12px', gap: 8, borderTop: i > 0 ? '1px solid #e2e8f0' : 'none', alignItems: 'center' }}>
-                      <input placeholder="Description" value={item.description} onChange={e => updateItem(i, 'description', e.target.value)} required style={{ ...inputStyle }} />
-                      <input type="number" min={1} value={item.quantity} onChange={e => updateItem(i, 'quantity', e.target.value)} style={{ ...inputStyle }} />
-                      <input type="number" min={0} value={item.rate} onChange={e => updateItem(i, 'rate', e.target.value)} style={{ ...inputStyle }} />
-                      <div style={{ fontSize: 13, fontWeight: 500, color: '#1e293b' }}>₹{(item.quantity * item.rate).toLocaleString()}</div>
-                      <button type="button" onClick={() => removeItem(i)} style={{ background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: 4, padding: '4px 8px', cursor: 'pointer', fontSize: 12 }}>✕</button>
-                    </div>
-                  ))}
-                </div>
-                <button type="button" onClick={addItem} style={{ marginTop: 8, background: 'none', border: '1px dashed #e2e8f0', color: '#6366f1', borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontWeight: 500 }}>+ Add Line Item</button>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', borderRadius: 8, padding: '12px 16px', marginBottom: 16 }}>
-                <span style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>Total Amount</span>
-                <span style={{ fontSize: 20, fontWeight: 700, color: '#6366f1' }}>₹{total.toLocaleString()}</span>
-              </div>
-
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button type="submit" disabled={saving} style={{ background: '#6366f1', color: 'white', border: 'none', borderRadius: 8, padding: '10px 24px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>{saving ? 'Creating...' : 'Create Invoice'}</button>
-                <button type="button" onClick={() => setShowForm(false)} style={{ background: 'white', border: '1px solid #e2e8f0', color: '#64748b', borderRadius: 8, padding: '10px 20px', fontSize: 13, cursor: 'pointer' }}>Cancel</button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* Filter Tabs */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-          {['All', 'Unpaid', 'Paid', 'Overdue'].map(f => (
-            <button key={f} onClick={() => setFilter(f)}
-              style={{ padding: '6px 16px', borderRadius: 20, fontSize: 13, fontWeight: 500, border: 'none', cursor: 'pointer', background: filter === f ? '#6366f1' : 'white', color: filter === f ? 'white' : '#64748b', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-              {f} {f !== 'All' && `(${invoices.filter(i => i.status === f.toLowerCase()).length})`}
-            </button>
-          ))}
-        </div>
-
-        {/* Table */}
-        <div style={{ background: 'white', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.08)', border: '1px solid #f1f5f9', overflow: 'hidden' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1.5fr 1.5fr 1.5fr 1.5fr', padding: '10px 20px', background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
-            {['Invoice #', 'Client', 'Total Amount', 'Due Date', 'Payment Status', 'Actions'].map(h => (
-              <div key={h} style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</div>
-            ))}
-          </div>
-
-          {loading ? (
-            <div style={{ padding: 40, textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>Loading invoices...</div>
-          ) : filtered.length === 0 ? (
-            <div style={{ padding: 60, textAlign: 'center', color: '#94a3b8' }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>🧾</div>
-              <p style={{ fontWeight: 500 }}>No invoices found</p>
+    <PageShell
+      title="Invoices"
+      subtitle="Track payment status, send links, and handle paid invoices quickly."
+      actions={
+        <button type="button" className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
+          + Create invoice
+        </button>
+      }
+    >
+      {showForm && (
+        <div className="card card-body" style={{ marginBottom: 24 }}>
+          <div className="page-header" style={{ marginBottom: 20 }}>
+            <div>
+              <h2 style={{ fontSize: 18, fontWeight: 600 }}>New invoice</h2>
+              <p className="text-secondary" style={{ fontSize: 13 }}>Create a new invoice and send it to your client in one click.</p>
             </div>
-          ) : filtered.map((inv, i) => {
-            const s = statusMap[inv.status] || statusMap.unpaid;
-            return (
-              <div key={inv._id} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1.5fr 1.5fr 1.5fr 1.5fr', padding: '14px 20px', borderBottom: i < filtered.length - 1 ? '1px solid #f8fafc' : 'none', alignItems: 'center' }}
-                onMouseEnter={e => e.currentTarget.style.background = '#fafafa'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#6366f1' }}>{inv.invoiceNumber}</div>
-                <div style={{ fontSize: 13, color: '#1e293b', fontWeight: 500 }}>{inv.clientId?.name || '—'}</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>₹{inv.totalAmount?.toLocaleString()}</div>
-                <div style={{ fontSize: 13, color: '#64748b' }}>{new Date(inv.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}</div>
-                <div><span style={{ background: s.bg, color: s.color, fontSize: 11, padding: '3px 10px', borderRadius: 20, fontWeight: 600 }}>{s.label}</span></div>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {inv.status !== 'paid' && (
-                    <button onClick={() => handleStatus(inv._id, 'paid')}
-                      style={{ background: '#f0fdf4', color: '#16a34a', border: 'none', borderRadius: 6, padding: '5px 10px', cursor: 'pointer', fontSize: 11, fontWeight: 500 }}>Mark as Paid</button>
-                  )}
-                  <button onClick={() => handleDelete(inv._id)}
-                    style={{ background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: 6, padding: '5px 10px', cursor: 'pointer', fontSize: 11, fontWeight: 500 }}>Delete</button>
-                </div>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowForm(false)}>Cancel</button>
+          </div>
+          <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20, marginBottom: 20 }}>
+            <div>
+              <label className="input-label" htmlFor="inv-client">Client *</label>
+              <select id="inv-client" className="input-field" required value={form.clientId} onChange={(e) => setForm({ ...form, clientId: e.target.value })}>
+                <option value="">Select client…</option>
+                {clients.map((client) => <option key={client._id} value={client._id}>{client.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="input-label" htmlFor="inv-due">Due date *</label>
+              <input id="inv-due" className="input-field" required type="date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} />
+            </div>
+            <div>
+              <label className="input-label" htmlFor="inv-currency">Currency</label>
+              <select id="inv-currency" className="input-field" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
+                <option value="INR">INR ₹</option>
+                <option value="USD">USD $</option>
+                <option value="EUR">EUR €</option>
+              </select>
+            </div>
+          </form>
+          <div className="card card-body" style={{ background: 'var(--color-surface-muted)', marginBottom: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1fr 1fr auto', gap: 12, padding: '12px 0', fontSize: 12, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <div>Description</div><div>Qty</div><div>Rate</div><div>Total</div><div />
+            </div>
+            {form.items.map((item, index) => (
+              <div key={index} style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1fr 1fr auto', gap: 12, alignItems: 'center', padding: '12px 0', borderTop: '1px solid var(--color-border-subtle)' }}>
+                <input className="input-field" value={item.description} onChange={(e) => updateItem(index, 'description', e.target.value)} placeholder="Description" />
+                <input className="input-field" type="number" min={1} value={item.quantity} onChange={(e) => updateItem(index, 'quantity', e.target.value)} />
+                <input className="input-field" type="number" min={0} value={item.rate} onChange={(e) => updateItem(index, 'rate', e.target.value)} />
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-surface-strong)' }}>₹{(item.quantity * item.rate).toLocaleString()}</div>
+                <button type="button" className="btn btn-danger btn-sm" onClick={() => removeItem(index)} aria-label="Remove item">✕</button>
               </div>
-            );
-          })}
+            ))}
+            <button type="button" className="btn btn-ghost btn-sm" style={{ marginTop: 16, border: '1px dashed var(--color-border-default)', width: '100%' }} onClick={addItem}>+ Add item</button>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-default)', marginBottom: 20 }}>
+            <div className="text-secondary" style={{ fontWeight: 500 }}>Total amount</div>
+            <div style={{ color: 'var(--color-surface-strong)', fontSize: 24, fontWeight: 600 }}>₹{total.toLocaleString()}</div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, flexWrap: 'wrap' }}>
+            <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+            <button type="submit" className={`btn btn-primary${saving ? ' loading' : ''}`} disabled={saving} onClick={handleCreate}>{saving ? 'Creating…' : 'Create invoice'}</button>
+          </div>
         </div>
-      </main>
-    </div>
+      )}
+
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
+        {['All', 'Unpaid', 'Paid', 'Overdue'].map((tab) => (
+          <button key={tab} type="button" className={`filter-pill${filter === tab ? ' active' : ''}`} onClick={() => setFilter(tab)}>{tab}</button>
+        ))}
+      </div>
+
+      <div className="table-shell">
+        <div className="table-head table-cols-invoices">
+          {['Invoice #', 'Client', 'Amount', 'Due date', 'Status', 'Actions'].map((h) => <div key={h}>{h}</div>)}
+        </div>
+        {loading ? (
+          <div className="table-empty">Loading invoices…</div>
+        ) : filtered.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon" aria-hidden="true">▦</div>
+            <div className="empty-state-title">No invoices found</div>
+          </div>
+        ) : (
+          filtered.map((invoice) => (
+            <div key={invoice._id} className="table-row table-cols-invoices">
+              <div className="table-primary-text text-primary-accent">{invoice.invoiceNumber}</div>
+              <div className="table-primary-text">{invoice.clientId?.name || '—'}</div>
+              <div className="table-primary-text">₹{invoice.totalAmount?.toLocaleString()}</div>
+              <div className="table-secondary-text">
+                {new Date(invoice.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}
+              </div>
+              <div>
+                <span className={`status-badge ${statusClass[invoice.status] || 'badge-sent'}`}>
+                  {statusLabel[invoice.status] || invoice.status}
+                </span>
+              </div>
+              <div className="table-actions">
+                <button type="button" className="btn btn-primary btn-sm" onClick={() => toast.success('Pay link copied!')}>Pay link</button>
+                {invoice.status !== 'paid' && (
+                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleStatus(invoice._id, 'paid')}>Mark paid</button>
+                )}
+                <button type="button" className="btn btn-danger btn-sm" onClick={() => handleDelete(invoice._id)}>Delete</button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </PageShell>
   );
 };
 

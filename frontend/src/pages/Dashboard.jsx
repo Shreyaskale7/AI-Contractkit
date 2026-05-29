@@ -1,181 +1,205 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { LayoutGrid, Search, Sparkles } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
 import { getClients, getContracts, getInvoices } from '../services/api';
-import { Link } from 'react-router-dom';
-import { StatCardSkeleton, TableSkeleton } from '../components/Skeleton';
-import EmptyState from '../components/EmptyState';
+import { TableSkeleton } from '../components/Skeleton';
 
-const StatCard = ({ label, value, sub, icon, color, bg }) => (
-  <div style={{ background: 'white', borderRadius: 12, padding: '20px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', border: '1px solid #f1f5f9' }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-      <div style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>{label}</div>
-      <div style={{ width: 36, height: 36, borderRadius: 10, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>{icon}</div>
-    </div>
-    <div style={{ fontSize: 26, fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>{value}</div>
-    {sub && <div style={{ fontSize: 12, color: '#94a3b8' }}>{sub}</div>}
-  </div>
-);
+const statusConfig = {
+  draft: { className: 'dash-badge dash-badge--draft', label: 'DRAFT' },
+  sent: { className: 'dash-badge dash-badge--pending', label: 'PENDING' },
+  signed: { className: 'dash-badge dash-badge--signed', label: 'SIGNED' },
+  paid: { className: 'dash-badge dash-badge--signed', label: 'PAID' },
+};
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState({ clients: 0, contracts: 0, invoices: 0, revenue: 0, pending: 0, signed: 0 });
+  const [stats, setStats] = useState({ clients: 0, contracts: 0, revenue: 0, pending: 0, signed: 0 });
   const [recentContracts, setRecentContracts] = useState([]);
-  const [recentInvoices, setRecentInvoices]   = useState([]);
+  const [recentInvoices, setRecentInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [c, co, inv] = await Promise.all([getClients(), getContracts(), getInvoices()]);
-        const revenue = inv.data.filter(i => i.status === 'paid').reduce((s, i) => s + i.totalAmount, 0);
-        const pending = inv.data.filter(i => i.status === 'unpaid').reduce((s, i) => s + i.totalAmount, 0);
-        const signed  = co.data.filter(c => c.status === 'signed').length;
-        setStats({ clients: c.data.length, contracts: co.data.length, invoices: inv.data.length, revenue, pending, signed });
-        setRecentContracts(co.data.slice(0, 5));
-        setRecentInvoices(inv.data.slice(0, 5));
-      } catch(e) { console.error(e); }
-      finally { setLoading(false); }
+        const revenue = inv.data.filter((i) => i.status === 'paid').reduce((sum, invoice) => sum + invoice.totalAmount, 0);
+        const pending = inv.data.filter((i) => i.status !== 'paid').reduce((sum, invoice) => sum + invoice.totalAmount, 0);
+        const signed = co.data.filter((contract) => contract.status === 'signed').length;
+        setStats({
+          clients: c.data.length,
+          contracts: co.data.length,
+          revenue,
+          pending,
+          signed,
+        });
+        setRecentContracts(co.data.slice(0, 3));
+        setRecentInvoices(inv.data.slice(0, 3));
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
   }, []);
 
-  const statusBadge = (status) => {
-    const map = {
-      draft:   { bg: '#f8fafc', color: '#64748b', label: 'Draft' },
-      sent:    { bg: '#fffbeb', color: '#d97706', label: 'Sent' },
-      signed:  { bg: '#f0fdf4', color: '#16a34a', label: 'Signed' },
-      unpaid:  { bg: '#fffbeb', color: '#d97706', label: 'Unpaid' },
-      paid:    { bg: '#f0fdf4', color: '#16a34a', label: 'Paid' },
-      overdue: { bg: '#fef2f2', color: '#dc2626', label: 'Overdue' },
-    };
-    const s = map[status] || map.draft;
-    return (
-      <span style={{ background: s.bg, color: s.color, fontSize: 11, padding: '3px 10px', borderRadius: 20, fontWeight: 600 }}>
-        {s.label}
-      </span>
-    );
-  };
+  const filteredContracts = recentContracts.filter(
+    (contract) =>
+      contract.title?.toLowerCase().includes(search.toLowerCase()) ||
+      contract.clientId?.name?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const greeting = new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening';
+  const dateLabel = new Date().toLocaleDateString('en-IN', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  const firstName = user?.name?.split(' ')[0] || 'there';
+  const userInitials = user?.name
+    ?.split(' ')
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
+  const statCards = [
+    { label: 'TOTAL REVENUE', value: `₹${stats.revenue.toLocaleString()}`, meta: 'Paid invoices', trend: '▲ 12%', up: true },
+    { label: 'PENDING REVENUE', value: `₹${stats.pending.toLocaleString()}`, meta: 'Awaiting payment', trend: '▼ 3%', up: false },
+    { label: 'ACTIVE CLIENTS', value: stats.clients, meta: 'Current relationships', trend: '▲ 8%', up: true },
+    { label: 'SIGNED CONTRACTS', value: stats.signed, meta: `of ${stats.contracts}`, trend: '▲ 5%', up: true },
+  ];
 
   return (
-    <div style={{ display: 'flex', background: '#f8fafc', minHeight: '100vh' }}>
+    <div className="app-shell">
       <Sidebar />
-      <main style={{ marginLeft: 220, flex: 1, padding: '32px 40px' }}>
-
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+      <main className="page-main dash-main">
+        <header className="dash-header">
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>
-              Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}, {user?.name?.split(' ')[0]}! 👋
-            </h1>
-            <p style={{ fontSize: 14, color: '#64748b' }}>Here's your business overview for today.</p>
+            <p className="dash-greeting">Good {greeting}, {userInitials || firstName}.</p>
+            <h1 className="dash-title">Contract business overview</h1>
+            <p className="dash-subtitle">
+              Today is {dateLabel}. Track revenue, contracts, and invoices in one secure view.
+            </p>
           </div>
-          <Link to="/contracts/generate"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', padding: '10px 20px', borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 4px 14px rgba(99,102,241,0.4)' }}>
-            ✨ Generate AI Contract
+        </header>
+
+        <div className="dash-action-bar">
+          <div className="dash-search-wrap">
+            <Search className="dash-search-icon" aria-hidden="true" />
+            <input
+              className="dash-search-input"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search contracts..."
+              aria-label="Search contracts"
+            />
+          </div>
+          <Link to="/contracts/generate" className="dash-btn-primary">
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
+            Generate contract
           </Link>
         </div>
 
-        {/* Stats Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 32 }}>
-          {loading ? (
-            Array(4).fill(0).map((_, i) => <StatCardSkeleton key={i} />)
-          ) : (
-            <>
-              <StatCard label="Total Revenue"   value={`₹${stats.revenue.toLocaleString()}`} sub="From paid invoices" icon="💰" bg="#f0fdf4" color="#16a34a" />
-              <StatCard label="Pending Revenue" value={`₹${stats.pending.toLocaleString()}`}  sub="Awaiting payment"   icon="⏳" bg="#fffbeb" color="#d97706" />
-              <StatCard label="Total Clients"   value={stats.clients}  sub="Active clients" icon="👥" bg="#eef2ff" color="#6366f1" />
-              <StatCard label="Signed Contracts" value={stats.signed}  sub={`of ${stats.contracts} contracts`} icon="✅" bg="#f0fdf4" color="#16a34a" />
-            </>
-          )}
+        <div className="dash-metrics">
+          {loading
+            ? Array(4)
+                .fill(0)
+                .map((_, i) => <div key={i} className="dash-metric-card dash-metric-card--skeleton" />)
+            : statCards.map((item) => (
+                <div key={item.label} className="dash-metric-card">
+                  <div className="dash-metric-label">{item.label}</div>
+                  <div className="dash-metric-value">{item.value}</div>
+                  <div className="dash-metric-footer">
+                    <span>{item.meta}</span>
+                    <span className={item.up ? 'dash-trend dash-trend--up' : 'dash-trend dash-trend--down'}>
+                      {item.trend}
+                    </span>
+                  </div>
+                </div>
+              ))}
         </div>
 
-        {/* Two Column Layout */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-
-          {/* Recent Contracts */}
-          <div style={{ background: 'white', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.08)', border: '1px solid #f1f5f9', overflow: 'hidden' }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>Recent Contracts</div>
-              <Link to="/contracts" style={{ fontSize: 12, color: '#6366f1', textDecoration: 'none', fontWeight: 500 }}>View all →</Link>
+        <div className="dash-bottom-grid">
+          <div className="dash-panel">
+            <div className="dash-panel-header">
+              <div>
+                <h2 className="dash-panel-title">Recent contracts</h2>
+                <p className="dash-panel-meta">{recentContracts.length} latest items</p>
+              </div>
+              <Link to="/contracts" className="dash-link">View all</Link>
             </div>
             {loading ? (
-              <TableSkeleton rows={5} />
-            ) : recentContracts.length === 0 ? (
-              <EmptyState
-                icon="📄"
-                title="No contracts yet"
-                description="Generate your first AI contract in seconds."
-                actionLabel="✨ Generate"
-                actionTo="/contracts/generate"
-              />
-            ) : recentContracts.map((c, i) => (
-              <div key={c._id} style={{ padding: '12px 20px', borderBottom: i < recentContracts.length - 1 ? '1px solid #f8fafc' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: '#1e293b', marginBottom: 2 }}>{c.title}</div>
-                  <div style={{ fontSize: 12, color: '#94a3b8' }}>{c.clientId?.name || 'No client'}</div>
-                </div>
-                {statusBadge(c.status)}
+              <TableSkeleton rows={3} />
+            ) : filteredContracts.length === 0 ? (
+              <p className="dash-empty-inline">No recent contracts yet.</p>
+            ) : (
+              <div className="dash-rows">
+                {filteredContracts.map((contract) => {
+                  const badge = statusConfig[contract.status] || statusConfig.draft;
+                  return (
+                    <Link
+                      key={contract._id}
+                      to={`/contracts`}
+                      className="dash-row"
+                    >
+                      <div className="dash-row-main">
+                        <div className="dash-row-title">{contract.title}</div>
+                        <div className="dash-row-client">{contract.clientId?.name || 'No client selected'}</div>
+                      </div>
+                      <div className="dash-row-side">
+                        <span className={badge.className}>{badge.label}</span>
+                        <span className="dash-row-date">
+                          {new Date(contract.updatedAt).toLocaleDateString('en-IN')}
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
-            ))}
+            )}
           </div>
 
-          {/* Recent Invoices */}
-          <div style={{ background: 'white', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.08)', border: '1px solid #f1f5f9', overflow: 'hidden' }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>Recent Invoices</div>
-              <Link to="/invoices" style={{ fontSize: 12, color: '#6366f1', textDecoration: 'none', fontWeight: 500 }}>View all →</Link>
+          <div className="dash-panel">
+            <div className="dash-panel-header">
+              <div>
+                <h2 className="dash-panel-title">Recent invoices</h2>
+                <p className="dash-panel-meta">{recentInvoices.length} latest invoices</p>
+              </div>
             </div>
             {loading ? (
-              <TableSkeleton rows={5} />
+              <TableSkeleton rows={3} />
             ) : recentInvoices.length === 0 ? (
-              <EmptyState
-                icon="🧾"
-                title="No invoices yet"
-                description="Create your first invoice to manage payments."
-                actionLabel="🧾 Create Invoice"
-                actionTo="/invoices"
-              />
-            ) : recentInvoices.map((inv, i) => (
-              <div key={inv._id} style={{ padding: '12px 20px', borderBottom: i < recentInvoices.length - 1 ? '1px solid #f8fafc' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: '#1e293b', marginBottom: 2 }}>{inv.invoiceNumber}</div>
-                  <div style={{ fontSize: 12, color: '#94a3b8' }}>{inv.clientId?.name || 'No client'}</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', marginBottom: 2 }}>₹{inv.totalAmount?.toLocaleString()}</div>
-                  {statusBadge(inv.status)}
-                </div>
+              <div className="dash-empty">
+                <LayoutGrid className="dash-empty-icon" aria-hidden="true" />
+                <p className="dash-empty-title">No invoices yet</p>
+                <p className="dash-empty-desc">Send your first invoice to start tracking payments.</p>
               </div>
-            ))}
+            ) : (
+              <div className="dash-rows">
+                {recentInvoices.map((invoice) => {
+                  const badge = statusConfig[invoice.status] || statusConfig.draft;
+                  return (
+                    <div key={invoice._id} className="dash-row dash-row--static">
+                      <div className="dash-row-main">
+                        <div className="dash-row-title">{invoice.invoiceNumber}</div>
+                        <div className="dash-row-client">{invoice.clientId?.name || 'Unknown client'}</div>
+                      </div>
+                      <div className="dash-row-side">
+                        <span className="dash-row-amount">₹{invoice.totalAmount?.toLocaleString()}</span>
+                        <span className={badge.className}>{badge.label}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Quick Actions */}
-        <div style={{ marginTop: 24, background: 'white', borderRadius: 12, padding: '20px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', border: '1px solid #f1f5f9' }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', marginBottom: 16 }}>Quick Actions</div>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            {[
-              { to: '/contracts/generate', label: '✨ Generate Contract', primary: true },
-              { to: '/proposals/generate', label: '🤖 Generate Proposal', primary: false },
-              { to: '/clients',            label: '👥 Add Client',        primary: false },
-              { to: '/invoices',           label: '🧾 Create Invoice',    primary: false },
-              { to: '/analytics',          label: '📊 View Analytics',   primary: false },
-            ].map(({ to, label, primary }) => (
-              <Link key={to} to={to} style={{
-                padding: '9px 18px', borderRadius: 8, textDecoration: 'none',
-                fontSize: 13, fontWeight: 500,
-                background: primary ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'white',
-                color: primary ? 'white' : '#374151',
-                border: primary ? 'none' : '1px solid #e2e8f0',
-                boxShadow: primary ? '0 4px 14px rgba(99,102,241,0.3)' : 'none',
-              }}>
-                {label}
-              </Link>
-            ))}
-          </div>
-        </div>
-
       </main>
     </div>
   );

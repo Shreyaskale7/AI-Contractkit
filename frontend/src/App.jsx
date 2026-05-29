@@ -3,7 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import Landing from './pages/Landing';
+import ContractKitLanding from './pages/ContractKitLanding';
 import PaymentSuccess from './pages/PaymentSuccess';
 import Login            from './pages/Login';
 import Register         from './pages/Register';
@@ -18,6 +18,7 @@ import Templates       from './pages/Templates';
 import Invoices         from './pages/Invoices';
 import Analytics        from './pages/Analytics';
 import Profile from './pages/Profile';
+import Security from './pages/Security';
 import PublicContract from './pages/PublicContract';
 
 function App() {
@@ -27,9 +28,10 @@ function App() {
         <BrowserRouter>
           <Toaster position="top-right" />
           <Routes>
-            <Route path="/" element={<Landing />} />
+            <Route path="/" element={<ContractKitLanding />} />
             <Route path="/login"    element={<Login />} />
             <Route path="/register" element={<Register />} />
+      <Route path="/signup" element={<Register />} />
             <Route path="/payment/success" element={<PaymentSuccess />} />
             <Route path="/contract/public/:token" element={<PublicContract />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -42,6 +44,7 @@ function App() {
             <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
             <Route path="/invoices"  element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+            <Route path="/security"  element={<ProtectedRoute><Security /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
           </Routes>
