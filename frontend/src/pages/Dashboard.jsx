@@ -20,6 +20,7 @@ const Dashboard = () => {
   const [recentInvoices, setRecentInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [negotiations, setNegotiations] = useState([]); // contracts with open client comments
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +38,14 @@ const Dashboard = () => {
         });
         setRecentContracts(co.data.slice(0, 3));
         setRecentInvoices(inv.data.slice(0, 3));
+        setNegotiations(
+          co.data
+            .map((contract) => ({
+              ...contract,
+              openComments: (contract.comments || []).filter((cm) => cm.status === 'open').length,
+            }))
+            .filter((contract) => contract.openComments > 0)
+        );
       } catch (error) {
         console.error(error);
       } finally {
@@ -105,6 +114,23 @@ const Dashboard = () => {
           </Link>
         </div>
 
+        {negotiations.length > 0 && (
+          <div style={{ marginBottom: 20, padding: '14px 18px', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 12, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 20 }} aria-hidden="true">💬</span>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontWeight: 600, color: '#ea580c', fontSize: 14 }}>
+                {negotiations.length} contract{negotiations.length > 1 ? 's have' : ' has'} pending change requests from clients
+              </div>
+              <div style={{ fontSize: 12, color: '#9a3412' }}>
+                {negotiations.slice(0, 3).map((c) => c.title).join(', ')}{negotiations.length > 3 ? '…' : ''}
+              </div>
+            </div>
+            <Link to={`/contracts/${negotiations[0]._id}`} className="dash-btn-primary" style={{ whiteSpace: 'nowrap' }}>
+              Review now
+            </Link>
+          </div>
+        )}
+
         <div className="dash-metrics">
           {loading
             ? Array(4)
@@ -144,7 +170,7 @@ const Dashboard = () => {
                   return (
                     <Link
                       key={contract._id}
-                      to={`/contracts`}
+                      to={`/contracts/${contract._id}`}
                       className="dash-row"
                     >
                       <div className="dash-row-main">

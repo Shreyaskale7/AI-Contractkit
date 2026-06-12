@@ -11,22 +11,44 @@ import {
   Sun,
   Users,
   Zap,
+  Shield
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import BrandLogo from './BrandLogo';
 
-const navItems = [
-  { path: '/dashboard', icon: LayoutGrid, label: 'Dashboard' },
-  { path: '/clients', icon: Users, label: 'Clients' },
-  { path: '/contracts', icon: FileText, label: 'Contracts' },
-  { path: '/contracts/generate', icon: Sparkles, label: 'AI Contract' },
-  { path: '/invoices', icon: Receipt, label: 'Invoices' },
-  { path: '/proposals', icon: Layers, label: 'Proposals' },
-  { path: '/proposals/generate', icon: Zap, label: 'AI Proposal' },
-  { path: '/training', icon: Brain, label: 'AI Training' },
-  { path: '/templates', icon: Copy, label: 'Templates' },
+const navSections = [
+  {
+    title: 'Workspace',
+    items: [
+      { path: '/dashboard', icon: LayoutGrid, label: 'Dashboard' },
+      { path: '/clients', icon: Users, label: 'Clients' },
+      { path: '/contracts', icon: FileText, label: 'Contracts' },
+      { path: '/proposals', icon: Layers, label: 'Proposals' },
+      { path: '/invoices', icon: Receipt, label: 'Invoices' },
+    ],
+  },
+  {
+    title: 'AI Tools',
+    items: [
+      { path: '/contracts/generate', icon: Sparkles, label: 'AI Contract' },
+      { path: '/proposals/generate', icon: Zap, label: 'AI Proposal' },
+      { path: '/defender', icon: Shield, label: 'Scope Defender' },
+      { path: '/training', icon: Brain, label: 'AI Training' },
+      { path: '/templates', icon: Copy, label: 'Templates' },
+    ],
+  },
 ];
+
+const allNavPaths = navSections.flatMap((s) => s.items.map((i) => i.path));
+
+// Highlight the LONGEST nav path that matches the current URL, so
+// /contracts/123 highlights "Contracts" and /contracts/generate
+// highlights "AI Contract" (not both).
+const findActivePath = (pathname) =>
+  allNavPaths
+    .filter((p) => pathname === p || pathname.startsWith(`${p}/`))
+    .sort((a, b) => b.length - a.length)[0];
 
 const Sidebar = () => {
   const { pathname } = useLocation();
@@ -63,20 +85,27 @@ const Sidebar = () => {
       </div>
 
       <nav className="sidebar-nav" aria-label="Dashboard">
-        {navItems.map(({ path, icon: Icon, label }) => {
-          const isActive = pathname === path;
-          return (
-            <Link
-              key={path}
-              to={path}
-              className={`nav-item${isActive ? ' active' : ''}`}
-              aria-current={isActive ? 'page' : undefined}
-            >
-              <Icon className="nav-item-icon" aria-hidden="true" />
-              {label}
-            </Link>
-          );
-        })}
+        {navSections.map(({ title, items }) => (
+          <div key={title} style={{ marginBottom: 8 }}>
+            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', opacity: 0.55, padding: '8px 12px 4px', fontWeight: 600 }}>
+              {title}
+            </div>
+            {items.map(({ path, icon: Icon, label }) => {
+              const isActive = findActivePath(pathname) === path;
+              return (
+                <Link
+                  key={path}
+                  to={path}
+                  className={`nav-item${isActive ? ' active' : ''}`}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <Icon className="nav-item-icon" aria-hidden="true" />
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       <div className="sidebar-footer">

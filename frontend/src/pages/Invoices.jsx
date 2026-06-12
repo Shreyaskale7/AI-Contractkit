@@ -1,10 +1,15 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PageShell from '../components/PageShell';
+import EmptyState from '../components/EmptyState';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { getInvoices, createInvoice, updateInvoiceStatus, deleteInvoice, getClients } from '../services/api';
 import toast from 'react-hot-toast';
 
 const statusClass = { unpaid: 'badge-sent', paid: 'badge-paid', overdue: 'badge-overdue' };
 const statusLabel = { unpaid: 'Unpaid', paid: 'Paid', overdue: 'Overdue' };
+
+const currencySymbols = { INR: '₹', USD: '$', EUR: '€' };
+const symbolFor = (currency) => currencySymbols[currency] || `${currency} `;
 
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
@@ -13,6 +18,7 @@ const Invoices = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState('All');
+  const [pendingDelete, setPendingDelete] = useState(null);
   const [form, setForm] = useState({ clientId: '', dueDate: '', currency: 'INR', notes: '', items: [{ description: '', quantity: 1, rate: 0 }] });
 
   const fetchAll = async () => {
@@ -40,7 +46,13 @@ const Invoices = () => {
   const total = form.items.reduce((sum, item) => sum + item.quantity * item.rate, 0);
 
   const handleCreate = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
+    if (saving) return; // guard against double submission
+    if (!form.clientId) return toast.error('Please select a client');
+    if (!form.dueDate) return toast.error('Please set a due date');
+    if (form.items.length === 0 || form.items.some((i) => !i.description.trim())) {
+      return toast.error('Every line item needs a description');
+    }
     setSaving(true);
     try {
       await createInvoice(form);
@@ -65,8 +77,9 @@ const Invoices = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Delete invoice?')) return;
+  const handleDelete = async () => {
+    const id = pendingDelete;
+    setPendingDelete(null);
     try {
       await deleteInvoice(id);
       toast.success('Deleted!');
@@ -127,7 +140,7 @@ const Invoices = () => {
                 <input className="input-field" value={item.description} onChange={(e) => updateItem(index, 'description', e.target.value)} placeholder="Description" />
                 <input className="input-field" type="number" min={1} value={item.quantity} onChange={(e) => updateItem(index, 'quantity', e.target.value)} />
                 <input className="input-field" type="number" min={0} value={item.rate} onChange={(e) => updateItem(index, 'rate', e.target.value)} />
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-surface-strong)' }}>₹{(item.quantity * item.rate).toLocaleString()}</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-surface-strong)' }}>{symbolFor(form.currency)}{(item.quantity * item.rate).toLocaleString()}</div>
                 <button type="button" className="btn btn-danger btn-sm" onClick={() => removeItem(index)} aria-label="Remove item">✕</button>
               </div>
             ))}
@@ -135,11 +148,11 @@ const Invoices = () => {
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-default)', marginBottom: 20 }}>
             <div className="text-secondary" style={{ fontWeight: 500 }}>Total amount</div>
-            <div style={{ color: 'var(--color-surface-strong)', fontSize: 24, fontWeight: 600 }}>₹{total.toLocaleString()}</div>
+            <div style={{ color: 'var(--color-surface-strong)', fontSize: 24, fontWeight: 600 }}>{symbolFor(form.currency)}{total.toLocaleString()}</div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, flexWrap: 'wrap' }}>
             <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
-            <button type="submit" className={`btn btn-primary${saving ? ' loading' : ''}`} disabled={saving} onClick={handleCreate}>{saving ? 'Creating…' : 'Create invoice'}</button>
+            <button type="button" className={`btn btn-primary${saving ? ' loading' : ''}`} disabled={saving} onClick={handleCreate}>{saving ? 'Creating…' : 'Create invoice'}</button>
           </div>
         </div>
       )}
@@ -157,16 +170,17 @@ const Invoices = () => {
         {loading ? (
           <div className="table-empty">Loading invoices…</div>
         ) : filtered.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-state-icon" aria-hidden="true">▦</div>
-            <div className="empty-state-title">No invoices found</div>
-          </div>
+          <EmptyState
+            icon="▦"
+            title="No invoices found"
+            description={filter === 'All' ? 'Create your first invoice with the button above.' : `No ${filter.toLowerCase()} invoices right now.`}
+          />
         ) : (
           filtered.map((invoice) => (
             <div key={invoice._id} className="table-row table-cols-invoices">
               <div className="table-primary-text text-primary-accent">{invoice.invoiceNumber}</div>
               <div className="table-primary-text">{invoice.clientId?.name || '—'}</div>
-              <div className="table-primary-text">₹{invoice.totalAmount?.toLocaleString()}</div>
+              <div className="table-primary-text">{symbolFor(invoice.currency)}{invoice.totalAmount?.toLocaleString()}</div>
               <div className="table-secondary-text">
                 {new Date(invoice.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}
               </div>
@@ -176,16 +190,27 @@ const Invoices = () => {
                 </span>
               </div>
               <div className="table-actions">
-                <button type="button" className="btn btn-primary btn-sm" onClick={() => toast.success('Pay link copied!')}>Pay link</button>
                 {invoice.status !== 'paid' && (
-                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleStatus(invoice._id, 'paid')}>Mark paid</button>
+                  <button type="button" className="btn btn-primary btn-sm" onClick={() => handleStatus(invoice._id, 'paid')}>Mark paid</button>
                 )}
-                <button type="button" className="btn btn-danger btn-sm" onClick={() => handleDelete(invoice._id)}>Delete</button>
+                {invoice.status === 'unpaid' && new Date(invoice.dueDate) < new Date() && (
+                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleStatus(invoice._id, 'overdue')}>Mark overdue</button>
+                )}
+                <button type="button" className="btn btn-danger btn-sm" onClick={() => setPendingDelete(invoice._id)}>Delete</button>
               </div>
             </div>
           ))
         )}
       </div>
+
+      <ConfirmDialog
+        open={!!pendingDelete}
+        title="Delete invoice?"
+        message="This permanently removes the invoice. This cannot be undone."
+        confirmLabel="Delete invoice"
+        onConfirm={handleDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </PageShell>
   );
 };

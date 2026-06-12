@@ -18,10 +18,14 @@ connectDB();
 
 const app = express();
 
+// Behind Render/Vercel proxies — needed so req.ip is the real client IP
+// (used for the signature audit trail and rate limiting)
+app.set('trust proxy', 1);
+
 // MIDDLEWARE
 // express.json() lets us read JSON from request body (req.body)
 // cors() lets our React frontend (different port) talk to this server
-app.use(express.json());
+app.use(express.json({ limit: '2mb' })); // signature images come in as base64
 app.use(cors({
   origin: [
     'https://ai-contractkit.vercel.app',
@@ -46,6 +50,12 @@ app.use('/api/templates', require('./routes/templateRoutes'));
 app.use('/api/rag', require('./routes/ragRoutes'));
 // Health check route — visit localhost:5000 to confirm server is running
 app.get('/', (req, res) => res.send('AI ContractKit API is running ✅'));
+
+// GLOBAL ERROR HANDLER — express-async-errors forwards thrown async errors here
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err.message);
+  res.status(err.status || 500).json({ message: err.message || 'Something went wrong' });
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

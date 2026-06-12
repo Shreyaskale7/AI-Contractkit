@@ -256,12 +256,20 @@ Example: ["No late payment penalty", "Missing IP clause"]`
     temperature: 0.2,
   });
 
-  let riskFlags = [];
+  // Model returns an array of strings — map into the schema's riskAnalysis shape
+  let riskAnalysis = [];
   try {
     const raw     = riskCompletion.choices[0].message.content;
     const cleaned = raw.replace(/```json|```/g, '').trim();
-    riskFlags     = JSON.parse(cleaned);
-  } catch { riskFlags = ['Could not analyze risks — review manually']; }
+    const flags   = JSON.parse(cleaned);
+    riskAnalysis  = (Array.isArray(flags) ? flags : []).slice(0, 5).map((flag) => ({
+      originalText: '',
+      riskLevel: 'medium',
+      reasoning: String(flag),
+    }));
+  } catch {
+    riskAnalysis = [{ originalText: '', riskLevel: 'medium', reasoning: 'Could not analyze risks — review manually' }];
+  }
 
   // Step 8: Save contract
   const contract = await Contract.create({
@@ -270,7 +278,7 @@ Example: ["No late payment penalty", "Missing IP clause"]`
     title:       title || `${category.replace(/_/g, ' ')} Contract`,
     content:     contractContent,
     aiPrompt:    prompt,
-    riskFlags,
+    riskAnalysis,
     publicToken: crypto.randomBytes(16).toString('hex'),
   });
 
