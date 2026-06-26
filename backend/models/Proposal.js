@@ -13,4 +13,7 @@ const proposalSchema = new mongoose.Schema({
   publicToken: { type: String },
 }, { timestamps: true });
 
+proposalSchema.index({ publicToken: 1 }, { unique: true, sparse: true });
+proposalSchema.index({ userId: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Proposal', proposalSchema);

@@ -4,7 +4,6 @@ import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ContractKitLanding from './pages/ContractKitLanding';
-import PaymentSuccess from './pages/PaymentSuccess';
 import Login            from './pages/Login';
 import Register         from './pages/Register';
 import Dashboard        from './pages/Dashboard';
@@ -34,7 +33,6 @@ function App() {
             <Route path="/login"    element={<Login />} />
             <Route path="/register" element={<Register />} />
       <Route path="/signup" element={<Register />} />
-            <Route path="/payment/success" element={<PaymentSuccess />} />
             <Route path="/contract/public/:token" element={<PublicContract />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/clients"   element={<ProtectedRoute><Clients /></ProtectedRoute>} />

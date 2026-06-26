@@ -41,4 +41,10 @@ const contractSchema = new mongoose.Schema({
   publicToken: { type: String },
 }, { timestamps: true });
 
+// publicToken is looked up on every public view / sign / comment request,
+// and must be collision-free. unique + sparse lets older docs without one coexist.
+contractSchema.index({ publicToken: 1 }, { unique: true, sparse: true });
+// Dashboard lists are always scoped to the owner, newest first.
+contractSchema.index({ userId: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Contract', contractSchema);

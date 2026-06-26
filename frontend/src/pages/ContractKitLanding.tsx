@@ -26,9 +26,9 @@ const features = [
   },
   {
     icon: Wallet,
-    title: 'Invoice & Payments',
+    title: 'Invoicing',
     tag: 'INR · USD · EUR',
-    desc: 'Create line-item invoices, share pay links, and monitor revenue alongside your contract pipeline.',
+    desc: 'Create line-item invoices, track their status, and monitor revenue alongside your contract pipeline.',
   },
   {
     icon: Shield,
@@ -63,8 +63,8 @@ const steps = [
   },
   {
     step: '03',
-    title: 'Send, sign & get paid',
-    desc: 'Share a public link for e-signature, then invoice the client and track payment in the same workspace.',
+    title: 'Send, sign & invoice',
+    desc: 'Share a public link for signing, then invoice the client and track invoice status in the same workspace.',
   },
 ];
 

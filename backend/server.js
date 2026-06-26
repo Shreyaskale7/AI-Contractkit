@@ -9,6 +9,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 require('express-async-errors'); // handles async errors automatically
 const connectDB = require('./config/db');
+const { apiLimiter } = require('./middleware/rateLimiters');
 
 // Load .env variables into process.env
 dotenv.config();
@@ -36,6 +37,10 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+// Coarse global rate limit — a backstop against any single client flooding
+// the API. Tighter per-area limits live on the auth and AI routes.
+app.use('/api', apiLimiter);
 
 // ROUTES
 // Any request starting with /api/auth → goes to authRoutes

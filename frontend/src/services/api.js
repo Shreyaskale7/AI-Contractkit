@@ -98,6 +98,8 @@ export const generateContractStream = ({ body, onStage, onDelta, onDone, onError
   return () => controller.abort();
 };
 export const analyzeScope     = (id, data) => API.post(`/contracts/${id}/analyze-scope`, data);
+export const logScopeDefense  = (id, data) => API.post(`/contracts/${id}/scope-defense`, data);
+export const getScopeDefenses = ()          => API.get('/contracts/scope-defenses');
 
 // INVOICES
 export const createInvoice       = (data)        => API.post('/invoices', data);

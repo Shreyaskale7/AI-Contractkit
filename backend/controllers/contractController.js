@@ -1,7 +1,9 @@
 const Contract = require('../models/Contract');
-const groq = require('../config/groq');
+const ScopeDefense = require('../models/ScopeDefense');
 const crypto = require('crypto');
 const { draftContract, draftContractStream, analyzeRisks, editContract } = require('../services/aiService');
+const { analyzeScopeCreep } = require('../services/scopeService');
+const { summarizeDefenses } = require('../utils/scopeDefense');
 const emailService = require('../services/emailService');
 const { streamContractPdf } = require('../services/pdfService');
 
@@ -379,41 +381,55 @@ const analyzeScope = async (req, res) => {
   const contract = await Contract.findOne({ _id: req.params.id, userId: req.user._id });
   if (!contract) return res.status(404).json({ message: 'Contract not found' });
 
-  const { clientRequest } = req.body;
+  const { clientRequest, tone } = req.body;
   if (!clientRequest) return res.status(400).json({ message: 'Client request text is required' });
 
-  const completion = await groq.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
-    messages: [
-      {
-        role: 'system',
-        content: `You are the "Scope Creep Defender", an expert freelance contract lawyer.
-You will be provided with a signed contract and a new request from the client.
-Your job is to:
-1. Analyze if the client's request is out-of-scope based on the contract terms.
-2. Find the exact clause or wording in the contract that proves your point.
-3. Draft a polite, professional email for the freelancer to send to the client pushing back or offering it as a paid add-on.
+  // Delegates to scopeService, which normalizes the model output, scores
+  // confidence, locates the cited clause in the contract, and drafts the
+  // response email in the requested tone.
+  try {
+    const result = await analyzeScopeCreep({
+      contractContent: contract.content,
+      clientRequest,
+      tone,
+    });
+    res.json(result);
+  } catch {
+    return res.status(502).json({
+      message: 'The AI returned an unreadable response. Please try again.',
+    });
+  }
+};
 
-Return ONLY a JSON object with this exact structure:
-{
-  "isOutOfScope": true or false,
-  "relevantClause": "exact text from contract",
-  "reasoning": "brief explanation",
-  "draftEmail": "the drafted email to the client"
-}`
-      },
-      {
-        role: 'user',
-        content: `Contract:\n${contract.content}\n\nClient's New Request:\n${String(clientRequest).slice(0, 4000)}`
-      }
-    ],
-    max_tokens: 2000,
-    temperature: 0.2,
-    response_format: { type: "json_object" }
+// POST /api/contracts/:id/scope-defense — log an out-of-scope outcome and the
+// value of the additional work, so it can roll up into "revenue protected".
+const logScopeDefense = async (req, res) => {
+  const { estimatedValue, currency, requestText, isOutOfScope, clientName, status } = req.body;
+
+  const contract = await Contract.findOne({ _id: req.params.id, userId: req.user._id })
+    .populate('clientId', 'name');
+  if (!contract) return res.status(404).json({ message: 'Contract not found' });
+
+  const defense = await ScopeDefense.create({
+    userId:        req.user._id,
+    contractId:    contract._id,
+    clientName:    clientName || contract.clientId?.name || '',
+    requestText:   String(requestText || '').slice(0, 2000),
+    isOutOfScope:  isOutOfScope === undefined ? true : Boolean(isOutOfScope),
+    estimatedValue: Math.max(0, Number(estimatedValue) || 0),
+    currency:      currency || req.user.currency || 'INR',
+    status:        ['logged', 'billed', 'waived'].includes(status) ? status : 'logged',
   });
 
-  const result = JSON.parse(completion.choices[0].message.content);
-  res.json(result);
+  res.status(201).json(defense);
+};
+
+// GET /api/contracts/scope-defenses — recent defenses + "revenue protected" summary
+const getScopeDefenses = async (req, res) => {
+  const defenses = await ScopeDefense.find({ userId: req.user._id })
+    .sort('-createdAt')
+    .limit(100);
+  res.json({ defenses, summary: summarizeDefenses(defenses) });
 };
 
 // GET /api/contracts/:id/pdf — download PDF (owner)
@@ -446,6 +462,8 @@ module.exports = {
   addClientComment,
   resolveCommentWithAI,
   analyzeScope,
+  logScopeDefense,
+  getScopeDefenses,
   getELI5Contract,
   generateFromNotes
 };

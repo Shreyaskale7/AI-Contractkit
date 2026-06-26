@@ -1,87 +1,106 @@
 // backend/config/vectordb.js
-// Pure in-memory vector store — no ChromaDB needed!
-// Uses simple cosine similarity on word frequency vectors
+// Contract similarity index using TF-IDF weighted cosine similarity
+// (see utils/textSimilarity). Documents are PERSISTED in MongoDB (see
+// models/ContractVector) and cached in memory per category for fast queries,
+// so the learned library survives server restarts and cold starts.
 
-const store = {}; // { category: [{ id, content, vector }] }
+const ContractVector = require('../models/ContractVector');
+const { termFrequency, rankByTfIdf } = require('../utils/textSimilarity');
 
-// Convert text to a simple frequency vector
-const textToVector = (text) => {
-  const clean  = text.toLowerCase().replace(/<[^>]*>/g, ' ').replace(/[^a-z\s]/g, ' ');
-  const words  = clean.split(/\s+/).filter(w => w.length > 3);
-  const freq   = {};
-  words.forEach(w => freq[w] = (freq[w] || 0) + 1);
-  return freq;
+const CATEGORIES = ['web_development', 'mobile_development', 'design', 'content_writing', 'consulting', 'other'];
+
+// In-memory cache: { category: [{ id, content, tf, metadata }] }
+const store = {};
+// Categories whose rows have already been pulled from Mongo this process.
+const loaded = new Set();
+
+// Hydrate a category's cache from Mongo the first time it's touched.
+const ensureLoaded = async (category) => {
+  if (loaded.has(category)) return;
+  if (!store[category]) store[category] = [];
+  try {
+    const rows = await ContractVector.find({ category }).lean();
+    store[category] = rows.map((r) => ({
+      id:       r.docId,
+      content:  r.content,
+      tf:       r.vector && Object.keys(r.vector).length ? r.vector : termFrequency(r.content),
+      metadata: r.metadata || {},
+    }));
+  } catch (err) {
+    console.error(`vectordb hydrate error (${category}):`, err.message);
+  }
+  loaded.add(category);
 };
 
-// Cosine similarity between two frequency vectors
-const cosineSimilarity = (v1, v2) => {
-  const keys    = new Set([...Object.keys(v1), ...Object.keys(v2)]);
-  let   dot     = 0, mag1 = 0, mag2 = 0;
-  keys.forEach(k => {
-    const a = v1[k] || 0;
-    const b = v2[k] || 0;
-    dot  += a * b;
-    mag1 += a * a;
-    mag2 += b * b;
-  });
-  return mag1 && mag2 ? dot / (Math.sqrt(mag1) * Math.sqrt(mag2)) : 0;
+const persist = async (category, entry) => {
+  try {
+    await ContractVector.findOneAndUpdate(
+      { category, docId: entry.id },
+      { category, docId: entry.id, content: entry.content, vector: entry.tf, metadata: entry.metadata },
+      { upsert: true }
+    );
+  } catch (err) {
+    console.error('vectordb persist error:', err.message);
+  }
 };
 
 const getCollection = async (category = 'other') => {
-  if (!store[category]) store[category] = [];
+  await ensureLoaded(category);
+  const upsertCache = (entry) => {
+    const idx = store[category].findIndex((d) => d.id === entry.id);
+    if (idx === -1) store[category].push(entry);
+    else store[category][idx] = entry;
+  };
+  const toEntry = ({ ids, documents, metadatas }) => ({
+    id:       ids[0],
+    content:  documents[0],
+    tf:       termFrequency(documents[0]),
+    metadata: metadatas[0],
+  });
+
   return {
-    // Add document to store
-    add: async ({ ids, documents, metadatas }) => {
-      store[category].push({
-        id:       ids[0],
-        content:  documents[0],
-        vector:   textToVector(documents[0]),
-        metadata: metadatas[0],
-      });
+    add: async (args) => {
+      const entry = toEntry(args);
+      await persist(category, entry);
+      upsertCache(entry);
     },
-    // Update existing document
-    update: async ({ ids, documents, metadatas }) => {
-      const idx = store[category].findIndex(d => d.id === ids[0]);
-      if (idx !== -1) {
-        store[category][idx] = {
-          id:       ids[0],
-          content:  documents[0],
-          vector:   textToVector(documents[0]),
-          metadata: metadatas[0],
-        };
-      }
+    update: async (args) => {
+      const entry = toEntry(args);
+      await persist(category, entry);
+      upsertCache(entry);
     },
-    // Get by ID
     get: async ({ ids }) => {
-      const found = store[category].filter(d => ids.includes(d.id));
-      return { ids: found.map(d => d.id) };
+      const found = store[category].filter((d) => ids.includes(d.id));
+      return { ids: found.map((d) => d.id) };
     },
-    // Count documents
     count: async () => store[category].length,
-    // Query similar documents
     query: async ({ queryTexts, nResults }) => {
-      if (store[category].length === 0) return { documents: [[]] };
-      const queryVec = textToVector(queryTexts[0]);
-      const scored   = store[category]
-        .map(doc => ({ doc, score: cosineSimilarity(queryVec, doc.vector) }))
-        .sort((a, b) => b.score - a.score)
-        .slice(0, nResults);
-      return { documents: [scored.map(s => s.doc.content)] };
-    }
+      const ranked = rankByTfIdf(queryTexts[0], store[category], nResults);
+      return { documents: [ranked.map((r) => r.content)] };
+    },
   };
 };
 
-// Get stats for all categories
+// Get stats for all categories — counts come straight from Mongo so they're
+// accurate even for categories not yet hydrated into the cache.
 const getAllStats = async () => {
   const stats = {};
-  const CATEGORIES = ['web_development','mobile_development','design','content_writing','consulting','other'];
-  CATEGORIES.forEach(cat => { stats[cat] = (store[cat] || []).length; });
+  try {
+    const counts = await ContractVector.aggregate([
+      { $group: { _id: '$category', n: { $sum: 1 } } },
+    ]);
+    const byCat = Object.fromEntries(counts.map((c) => [c._id, c.n]));
+    CATEGORIES.forEach((cat) => { stats[cat] = byCat[cat] || 0; });
+  } catch (err) {
+    console.error('vectordb stats error:', err.message);
+    CATEGORIES.forEach((cat) => { stats[cat] = (store[cat] || []).length; });
+  }
   return stats;
 };
 
 // Auto-detect category from prompt
 const detectCategory = (prompt) => {
-  const p = prompt.toLowerCase();
+  const p = (prompt || '').toLowerCase();
   if (p.match(/react|node|express|mongodb|api|backend|frontend|website|web|fullstack|mern|next/)) return 'web_development';
   if (p.match(/mobile|android|ios|flutter|react native|swift|kotlin/)) return 'mobile_development';
   if (p.match(/logo|design|ui|ux|figma|brand|graphic|poster|banner|creative/)) return 'design';
@@ -89,7 +108,5 @@ const detectCategory = (prompt) => {
   if (p.match(/consult|strategy|advisory|mentor|coach|business|management|audit/)) return 'consulting';
   return 'other';
 };
-
-const CATEGORIES = ['web_development','mobile_development','design','content_writing','consulting','other'];
 
 module.exports = { getCollection, detectCategory, getAllStats, CATEGORIES };

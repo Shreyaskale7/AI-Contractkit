@@ -1,0 +1,275 @@
+{
+  "description": "Labeled cases for evaluating the Scope Creep Defender classifier. expectedOutOfScope is the ground-truth label (true = the new client request is additional, out-of-scope work that is NOT covered by the contract). Cases span web, mobile, design, content, and consulting contracts, with a mix of clearly in-scope, clearly out-of-scope, and borderline requests.",
+  "cases": [
+    {
+      "id": "web-extra-store",
+      "contract": "<h2>1. PROJECT SCOPE</h2><p>The Contractor will design and develop a five (5) page marketing website: Home, About, Services, Blog, and Contact.</p><h2>2. REVISIONS</h2><p>Two (2) rounds of revisions are included per page. Additional revisions are billed at $75/hour.</p><h2>3. PAYMENT</h2><p>Total fee $4,000, billed 50% upfront and 50% on delivery.</p>",
+      "request": "Can you also build an online store with a shopping cart and checkout while you're at it?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "web-included-revision",
+      "contract": "<h2>1. PROJECT SCOPE</h2><p>The Contractor will design and develop a five (5) page marketing website.</p><h2>2. REVISIONS</h2><p>Two (2) rounds of revisions are included per page.</p>",
+      "request": "Could you change the headline color on the homepage? This is our first revision request.",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "web-extra-pages",
+      "contract": "<h2>SCOPE</h2><p>Contractor will build exactly five (5) pages: Home, About, Services, Blog, Contact.</p>",
+      "request": "We'd like to add a Careers page and a Case Studies page too.",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "web-included-contact-page",
+      "contract": "<h2>SCOPE</h2><p>Contractor will build five (5) pages including a Contact page with a working contact form.</p>",
+      "request": "Can you make sure the Contact page form sends to our sales@ inbox?",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "web-extra-cms",
+      "contract": "<h2>SCOPE</h2><p>A static marketing website with hard-coded content provided by the Client.</p>",
+      "request": "Actually we want to be able to edit all the text ourselves — can you add a full CMS?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "web-included-deploy",
+      "contract": "<h2>SCOPE</h2><p>Contractor will develop and deploy the website to the Client's hosting account.</p>",
+      "request": "Once it's ready, please deploy it to our hosting so it goes live.",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "web-extra-seo",
+      "contract": "<h2>SCOPE</h2><p>Website design and development only. SEO and marketing are explicitly excluded.</p>",
+      "request": "Can you also do the SEO so we rank on Google?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "web-included-bugfix",
+      "contract": "<h2>WARRANTY</h2><p>The Contractor will fix any bugs reported within thirty (30) days of launch at no additional cost.</p>",
+      "request": "The contact form stopped sending emails — we launched 12 days ago. Can you fix it?",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "web-bugfix-expired",
+      "contract": "<h2>WARRANTY</h2><p>The Contractor will fix any bugs reported within thirty (30) days of launch at no additional cost. After 30 days, support is billed hourly.</p>",
+      "request": "It's been three months since launch and we found a small bug. You'll fix it free right?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "web-extra-integration",
+      "contract": "<h2>SCOPE</h2><p>Five-page website. No third-party integrations included.</p>",
+      "request": "Can you integrate Stripe payments and a Mailchimp signup form?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "web-included-responsive",
+      "contract": "<h2>SCOPE</h2><p>The website will be fully responsive across desktop, tablet, and mobile.</p>",
+      "request": "Please make sure it looks good on iPhone — the menu seems off on mobile.",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "design-logo-extra-formats",
+      "contract": "<h2>SCOPE</h2><p>Designer will deliver one (1) primary logo in PNG and SVG formats.</p><h2>OWNERSHIP</h2><p>Full ownership transfers to the Client upon final payment.</p>",
+      "request": "We also need a full brand style guide, social media kit, and business card designs.",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "design-included-variant",
+      "contract": "<h2>SCOPE</h2><p>Designer will deliver one (1) primary logo in PNG and SVG formats, plus a black-and-white variant.</p>",
+      "request": "Can you send over the black-and-white version of the logo as well?",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "design-extra-revisions",
+      "contract": "<h2>REVISIONS</h2><p>A maximum of two (2) revision rounds are included. Further rounds are $90 each.</p>",
+      "request": "This is our fourth set of changes — just tweak the colors again, should be quick.",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "design-included-firstrevision",
+      "contract": "<h2>REVISIONS</h2><p>A maximum of two (2) revision rounds are included.</p>",
+      "request": "First round of feedback: can the icon be a bit bolder?",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "design-extra-print",
+      "contract": "<h2>USAGE</h2><p>Designs are licensed for digital use only. Print usage is not included.</p>",
+      "request": "We're going to print 500 posters of this design for an event — that's fine, right?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "design-included-sourcefiles",
+      "contract": "<h2>DELIVERABLES</h2><p>Upon final payment, Designer will provide the editable source files (AI, PSD).</p>",
+      "request": "Now that we've paid in full, can you send the editable source files?",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "design-extra-website",
+      "contract": "<h2>SCOPE</h2><p>Brand identity design: logo, color palette, typography.</p>",
+      "request": "Could you also design and build our website using this branding?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "design-included-palette",
+      "contract": "<h2>SCOPE</h2><p>Brand identity design including logo, a color palette, and typography recommendations.</p>",
+      "request": "Can you share the hex codes for the brand color palette?",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "content-extra-formats",
+      "contract": "<h2>DELIVERABLES</h2><p>Writer will produce four (4) blog articles of up to 1,000 words each per month.</p><h2>PAYMENT</h2><p>Monthly retainer of $800.</p>",
+      "request": "This month can you also write 10 LinkedIn posts and a press release?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "content-included-edit",
+      "contract": "<h2>DELIVERABLES</h2><p>Four (4) blog articles per month, including one round of edits each.</p>",
+      "request": "Please make the requested edits to the second blog article.",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "content-extra-wordcount",
+      "contract": "<h2>DELIVERABLES</h2><p>Articles are up to 1,000 words each.</p>",
+      "request": "Can the next article be a deep-dive of about 4,000 words instead?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "content-included-topic",
+      "contract": "<h2>SCOPE</h2><p>Writer will cover topics chosen from the Client's content calendar.</p>",
+      "request": "Next article should be on 'remote team productivity' from our calendar.",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "content-extra-seo-strategy",
+      "contract": "<h2>SCOPE</h2><p>Article writing only. Keyword research and SEO strategy are excluded.</p>",
+      "request": "Can you also do keyword research and build us a 6-month SEO content strategy?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "content-included-research",
+      "contract": "<h2>SCOPE</h2><p>Each article includes background research and one royalty-free header image.</p>",
+      "request": "Did you include a header image with the article? We need one.",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "content-extra-translation",
+      "contract": "<h2>SCOPE</h2><p>Content will be written in English (US).</p>",
+      "request": "Could you also translate all the articles into Spanish and French?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "consulting-extra-execution",
+      "contract": "<h2>SERVICES</h2><p>Consultant will provide a one-time marketing audit and a written strategy report.</p><h2>TERM</h2><p>This is a one-time engagement.</p>",
+      "request": "Can you now run our paid ad campaigns and manage them monthly going forward?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "consulting-included-call",
+      "contract": "<h2>SERVICES</h2><p>Consultant will provide a marketing audit, a written strategy report, and one (1) 60-minute presentation call to review findings.</p>",
+      "request": "Can we schedule the 60-minute call to go over the report?",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "consulting-extra-hours",
+      "contract": "<h2>SCOPE</h2><p>Engagement covers up to ten (10) advisory hours per month.</p>",
+      "request": "We've used our 10 hours but need 8 more hours of your time this month.",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "consulting-included-email",
+      "contract": "<h2>SCOPE</h2><p>Monthly retainer includes unlimited email support and up to ten (10) call hours.</p>",
+      "request": "Quick email question about the strategy — is that covered?",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "consulting-extra-deliverable",
+      "contract": "<h2>DELIVERABLES</h2><p>A single competitive analysis report.</p>",
+      "request": "On top of the report, can you also build us a financial model in Excel?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "consulting-included-followup",
+      "contract": "<h2>SCOPE</h2><p>Includes the audit report and one (1) follow-up revision based on Client feedback.</p>",
+      "request": "We have feedback on the audit — can you do the one included revision?",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "mobile-extra-platform",
+      "contract": "<h2>SCOPE</h2><p>Developer will build a native iOS application only.</p><h2>PAYMENT</h2><p>Milestone-based: wireframes, beta, final.</p>",
+      "request": "Great — can you also deliver an Android version of the same app?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "mobile-included-beta",
+      "contract": "<h2>MILESTONES</h2><p>Milestone 2 is a beta build delivered via TestFlight for Client testing.</p>",
+      "request": "Can you push the beta build to TestFlight so our team can test it?",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "mobile-extra-appstore",
+      "contract": "<h2>SCOPE</h2><p>App development only. App Store submission and account setup are the Client's responsibility.</p>",
+      "request": "Can you handle submitting the app to the App Store for us?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "mobile-included-sourcecode",
+      "contract": "<h2>DELIVERABLES</h2><p>Full source code is delivered upon final payment.</p>",
+      "request": "We've made the final payment — please hand over the source code repository.",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "mobile-extra-backend",
+      "contract": "<h2>SCOPE</h2><p>Front-end mobile app only. The Client provides the backend API.</p>",
+      "request": "Turns out we don't have a backend — can you build the API and database too?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "mobile-included-devices",
+      "contract": "<h2>TESTING</h2><p>App will be tested on iPhone 13 and iPhone 15.</p>",
+      "request": "Did you test on iPhone 15? We want to confirm before launch.",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "mobile-extra-maintenance",
+      "contract": "<h2>SCOPE</h2><p>Build only. Ongoing maintenance requires a separate agreement.</p>",
+      "request": "Can you commit to maintaining and updating the app every month after launch?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "general-rush-deadline",
+      "contract": "<h2>TIMELINE</h2><p>Delivery within six (6) weeks of project start.</p>",
+      "request": "We actually need the whole thing finished in one week instead of six. Same price?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "general-within-timeline",
+      "contract": "<h2>TIMELINE</h2><p>Delivery within six (6) weeks of project start.</p>",
+      "request": "Just checking in — are we still on track for delivery in week six?",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "general-extra-meetings",
+      "contract": "<h2>COMMUNICATION</h2><p>Includes one (1) weekly 30-minute check-in call.</p>",
+      "request": "Can we switch to daily one-hour calls every morning instead?",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "general-included-checkin",
+      "contract": "<h2>COMMUNICATION</h2><p>Includes one (1) weekly 30-minute check-in call.</p>",
+      "request": "Let's do our weekly 30-minute check-in on Thursday.",
+      "expectedOutOfScope": false
+    },
+    {
+      "id": "general-extra-rush-fee-clause",
+      "contract": "<h2>RUSH WORK</h2><p>Any work requested outside the agreed timeline is subject to a 25% rush surcharge.</p>",
+      "request": "Need this by tomorrow — I know that's outside the timeline.",
+      "expectedOutOfScope": true
+    },
+    {
+      "id": "general-included-payment-question",
+      "contract": "<h2>PAYMENT</h2><p>50% deposit due on signing, 50% on delivery.</p>",
+      "request": "Just confirming — the remaining 50% is due when you deliver, correct?",
+      "expectedOutOfScope": false
+    }
+  ]
+}

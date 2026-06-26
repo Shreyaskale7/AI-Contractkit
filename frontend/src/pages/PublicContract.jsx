@@ -505,7 +505,7 @@ const PublicContract = () => {
 
               {/* Legal text */}
               <div style={{ background:'#f8fafc', borderRadius:8, padding:10, marginBottom:16, fontSize:11, color:'#64748b', lineHeight:1.6 }}>
-                By signing, you agree that this electronic signature is legally binding and equivalent to your handwritten signature.
+                By signing, you create an electronic record of your agreement to this document. Your signature is stored with a timestamp and a tamper-evidence hash of the exact contract content.
               </div>
 
               {/* Buttons */}
