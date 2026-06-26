@@ -9,12 +9,17 @@ const rateLimit = require('express-rate-limit');
 
 const json = (message) => ({ message });
 
+// Disable limiting under the test runner so integration tests can fire many
+// requests (especially to /api/auth) without tripping the throttle.
+const skip = () => process.env.NODE_ENV === 'test';
+
 // Global: applied once in server.js to every request.
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,
   standardHeaders: true,
   legacyHeaders: false,
+  skip,
   message: json('Too many requests — please slow down and try again shortly.'),
 });
 
@@ -24,6 +29,7 @@ const authLimiter = rateLimit({
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
+  skip,
   message: json('Too many login attempts — please try again in a few minutes.'),
 });
 
@@ -33,6 +39,7 @@ const aiLimiter = rateLimit({
   max: 40,
   standardHeaders: true,
   legacyHeaders: false,
+  skip,
   message: json('AI generation limit reached for this hour — please try again later.'),
 });
 
@@ -42,12 +49,14 @@ const publicReadLimiter = rateLimit({
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
+  skip,
 });
 const publicWriteLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
+  skip,
   message: json('Too many requests — please try again later.'),
 });
 const eli5Limiter = rateLimit({
@@ -55,6 +64,7 @@ const eli5Limiter = rateLimit({
   max: 10, // triggers a paid AI call on cache miss
   standardHeaders: true,
   legacyHeaders: false,
+  skip,
   message: json('Too many translation requests — please try again later.'),
 });
 
