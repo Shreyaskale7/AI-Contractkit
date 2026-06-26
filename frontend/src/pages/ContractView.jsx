@@ -20,7 +20,7 @@ const ContractView = () => {
       try {
         const res = await getContractById(id);
         setContract(res.data);
-      } catch (error) {
+      } catch {
         toast.error('Failed to load contract');
         navigate('/contracts');
       } finally {
@@ -36,7 +36,7 @@ const ContractView = () => {
       const res = await resolveCommentWithAI(id, commentId);
       setContract({ ...contract, content: res.data.content, comments: res.data.comments });
       toast.success('Clause rewritten successfully! ✨');
-    } catch (error) {
+    } catch {
       toast.error('Failed to resolve comment');
     } finally {
       setResolvingId(null);

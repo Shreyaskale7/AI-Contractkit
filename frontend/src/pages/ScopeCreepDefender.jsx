@@ -35,14 +35,14 @@ const ScopeCreepDefender = () => {
 
   const currency = summary?.defenses?.[0]?.currency || 'INR';
 
+  const refreshSummary = () => {
+    getScopeDefenses().then(res => setSummary(res.data)).catch(() => {});
+  };
+
   useEffect(() => {
     getContracts().then(res => setContracts(res.data)).catch(() => {});
     refreshSummary();
   }, []);
-
-  const refreshSummary = () => {
-    getScopeDefenses().then(res => setSummary(res.data)).catch(() => {});
-  };
 
   const runAnalysis = async (useTone = tone) => {
     if (!selectedContractId) return toast.error('Please select a contract first.');

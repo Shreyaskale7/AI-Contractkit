@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Zap } from 'lucide-react';
 
-const BrandLogo = ({ variant = 'dark', size = 'md', linkToHome = false, layout = 'inline' }) => {
+const BrandLogo = ({ size = 'md', linkToHome = false, layout = 'inline' }) => {
   const iconSize = size === 'lg' ? 'brand-icon-box--lg' : 'brand-icon-box--sm';
   const textSize = size === 'lg' ? 'text-xl' : 'text-base';
 

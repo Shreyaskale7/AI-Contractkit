@@ -64,7 +64,7 @@ const PublicContract = () => {
         const res = await getELI5Contract(token);
         setContract({ ...contract, eli5Content: res.data.content });
         setIsELI5(true);
-      } catch (error) {
+      } catch {
         toast.error('Failed to translate contract');
       } finally {
         setEli5Loading(false);
@@ -112,7 +112,7 @@ const PublicContract = () => {
       setShowCommentBox(false);
       setCommentNote('');
       window.getSelection().removeAllRanges();
-    } catch (error) {
+    } catch {
       toast.error('Failed to add comment');
     } finally {
       setSubmittingComment(false);
