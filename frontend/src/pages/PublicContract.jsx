@@ -434,7 +434,7 @@ const PublicContract = () => {
                     value={signerName}
                     onChange={e => setSignerName(e.target.value)}
                     placeholder="John Smith"
-                    style={{ width:'100%', border:'1px solid #e2e8f0', borderRadius:8, padding:'8px 12px', fontSize:13, outline:'none', boxSizing:'border-box' }}
+                    style={{ width:'100%', border:'1px solid #e2e8f0', borderRadius:8, padding:'8px 12px', fontSize:13, outline:'none', boxSizing:'border-box', color:'#1e293b', background:'#fff' }}
                   />
                 </div>
                 <div>
@@ -443,7 +443,7 @@ const PublicContract = () => {
                     value={signerEmail}
                     onChange={e => setSignerEmail(e.target.value)}
                     placeholder="john@example.com"
-                    style={{ width:'100%', border:'1px solid #e2e8f0', borderRadius:8, padding:'8px 12px', fontSize:13, outline:'none', boxSizing:'border-box' }}
+                    style={{ width:'100%', border:'1px solid #e2e8f0', borderRadius:8, padding:'8px 12px', fontSize:13, outline:'none', boxSizing:'border-box', color:'#1e293b', background:'#fff' }}
                   />
                 </div>
               </div>
@@ -494,7 +494,7 @@ const PublicContract = () => {
                       value={typedName}
                       onChange={e => setTypedName(e.target.value)}
                       placeholder="Type your full name"
-                      style={{ width:'100%', border:'1px solid #e2e8f0', borderRadius:8, padding:'10px 12px', fontSize:14, outline:'none', boxSizing:'border-box', marginBottom:8 }}
+                      style={{ width:'100%', border:'1px solid #e2e8f0', borderRadius:8, padding:'10px 12px', fontSize:14, outline:'none', boxSizing:'border-box', marginBottom:8, color:'#1e293b', background:'#fff' }}
                     />
                     <div style={{ border:'2px dashed #e2e8f0', borderRadius:8, background:'#fafafa', height:90, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'"Brush Script MT", "Segoe Script", cursive', fontStyle:'italic', fontSize:34, color:'#1e293b', overflow:'hidden', padding:'0 12px' }}>
                       {typedName || <span style={{ fontSize:13, fontFamily:'inherit', color:'#cbd5e1' }}>Signature preview</span>}

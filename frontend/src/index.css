@@ -190,6 +190,9 @@
 
 html {
   scroll-behavior: smooth;
+  /* Offset anchor jumps so sections (#features, #security, …) land BELOW the
+     sticky 64px nav instead of hidden underneath it. */
+  scroll-padding-top: 84px;
 }
 
 body {
@@ -338,6 +341,34 @@ body {
   top: 0;
   z-index: 100;
   border-right: 1px solid var(--saas-border);
+  transition: transform 0.25s ease;
+}
+
+/* Mobile nav: hamburger toggle + backdrop (hidden on desktop) */
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 120;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid var(--saas-border);
+  background: var(--saas-sidebar);
+  color: var(--saas-text);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+}
+
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: rgba(0, 0, 0, 0.45);
 }
 
 .sidebar-logo {
@@ -2359,8 +2390,11 @@ body {
 }
 
 @media (max-width: 768px) {
-  .page-main { margin-left: 0; }
-  .sidebar { transform: translateX(-100%); }
+  .page-main { margin-left: 0; padding-top: 64px; }
+  .sidebar { transform: translateX(-100%); box-shadow: var(--shadow-lg); }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-toggle { display: flex; }
+  .sidebar-backdrop { display: block; }
   .landing-feature-grid { grid-template-columns: 1fr; }
 }
 

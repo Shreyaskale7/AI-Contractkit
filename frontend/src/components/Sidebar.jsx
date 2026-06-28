@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Brain,
@@ -5,11 +6,13 @@ import {
   FileText,
   LayoutGrid,
   Layers,
+  Menu,
   Moon,
   Receipt,
   Sparkles,
   Sun,
   Users,
+  X,
   Zap,
   Shield
 } from 'lucide-react';
@@ -55,6 +58,10 @@ const Sidebar = () => {
   const { user, logoutUser } = useAuth();
   const { dark, toggleDark } = useTheme();
   const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close the mobile drawer whenever the route changes.
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   const handleLogout = () => {
     logoutUser();
@@ -69,7 +76,23 @@ const Sidebar = () => {
     .toUpperCase() || 'U';
 
   return (
-    <aside className="sidebar" aria-label="Main navigation">
+    <>
+      {/* Mobile-only hamburger to open the nav drawer */}
+      <button
+        type="button"
+        className="sidebar-toggle"
+        onClick={() => setMobileOpen((o) => !o)}
+        aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+        aria-expanded={mobileOpen}
+      >
+        {mobileOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
+      </button>
+
+      {mobileOpen && (
+        <div className="sidebar-backdrop" onClick={() => setMobileOpen(false)} aria-hidden="true" />
+      )}
+
+    <aside className={`sidebar${mobileOpen ? ' open' : ''}`} aria-label="Main navigation">
       <div className="sidebar-logo">
         <BrandLogo variant="saas" layout="stack" />
       </div>
@@ -98,6 +121,7 @@ const Sidebar = () => {
                   to={path}
                   className={`nav-item${isActive ? ' active' : ''}`}
                   aria-current={isActive ? 'page' : undefined}
+                  onClick={() => setMobileOpen(false)}
                 >
                   <Icon className="nav-item-icon" aria-hidden="true" />
                   {label}
@@ -123,6 +147,7 @@ const Sidebar = () => {
         </button>
       </div>
     </aside>
+    </>
   );
 };
 
