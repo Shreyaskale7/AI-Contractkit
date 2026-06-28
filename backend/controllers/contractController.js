@@ -434,14 +434,18 @@ const getScopeDefenses = async (req, res) => {
 
 // GET /api/contracts/:id/pdf — download PDF (owner)
 const downloadContractPdf = async (req, res) => {
-  const contract = await Contract.findOne({ _id: req.params.id, userId: req.user._id });
+  const contract = await Contract.findOne({ _id: req.params.id, userId: req.user._id })
+    .populate('userId', 'name businessName email phone website')
+    .populate('clientId', 'name company email');
   if (!contract) return res.status(404).json({ message: 'Contract not found' });
   streamContractPdf(contract, res);
 };
 
 // GET /api/contracts/public/:token/pdf — download PDF (client)
 const downloadPublicContractPdf = async (req, res) => {
-  const contract = await Contract.findOne({ publicToken: req.params.token });
+  const contract = await Contract.findOne({ publicToken: req.params.token })
+    .populate('userId', 'name businessName email phone website')
+    .populate('clientId', 'name company email');
   if (!contract) return res.status(404).json({ message: 'Contract not found' });
   streamContractPdf(contract, res);
 };
