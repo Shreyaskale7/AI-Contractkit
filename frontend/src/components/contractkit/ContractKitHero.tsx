@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const VIDEO_URL =
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_105406_16f4600d-7a92-4292-b96e-b19156c7830a.mp4';
+// Purple-desert cinematic loop (served from /public). The poster still shows
+// instantly while the 4K video streams in.
+const VIDEO_URL = '/purple-desert.mp4';
+const POSTER_URL = '/purple-desert.jpg';
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -11,14 +14,26 @@ const fadeUp = {
 };
 
 const ContractKitHero = () => {
+  // Fade the video in once it can actually play, so it never pops over the
+  // poster. The poster is also the section background (see .ck-hero) for an
+  // instant, flash-free first paint.
+  const [videoReady, setVideoReady] = useState(false);
+
   return (
-    <section id="home" className="ck-hero">
+    <section
+      id="home"
+      className="ck-hero"
+      style={{ backgroundImage: `url(${POSTER_URL})` }}
+    >
       <video
-        className="absolute inset-0 h-full w-full object-cover"
+        className={`ck-hero-video absolute inset-0 h-full w-full object-cover ${videoReady ? 'is-ready' : ''}`}
         autoPlay
         loop
         muted
         playsInline
+        preload="auto"
+        poster={POSTER_URL}
+        onCanPlay={() => setVideoReady(true)}
         aria-hidden="true"
       >
         <source src={VIDEO_URL} type="video/mp4" />

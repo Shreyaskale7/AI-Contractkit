@@ -127,7 +127,7 @@
   --landing-text: #09090b;
   --landing-text-secondary: #52525b;
   --landing-text-muted: #a1a1aa;
-  --landing-accent: #3b82f6;
+  --landing-accent: #a78bfa;
   --landing-nav-bg: rgba(248, 250, 252, 0.85);
 }
 
@@ -174,15 +174,15 @@
   --cream-bg: var(--saas-bg);
   --card-bg: var(--saas-surface);
 
-  --landing-bg: #0a0a0a;
-  --landing-surface: #111111;
-  --landing-surface-muted: #141414;
-  --landing-border: #1a1a1a;
+  --landing-bg: #0b0814;
+  --landing-surface: #120e20;
+  --landing-surface-muted: #161126;
+  --landing-border: #241b38;
   --landing-border-emphasis: #262626;
   --landing-text: #ffffff;
   --landing-text-secondary: #a1a1aa;
   --landing-text-muted: #52525b;
-  --landing-accent: #3b82f6;
+  --landing-accent: #a78bfa;
   --landing-nav-bg: rgba(10, 10, 10, 0.85);
 }
 
@@ -2713,19 +2713,42 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  /* Dark base color; the poster image is set inline on the section (see
+     ContractKitHero) so Vite doesn't rebase the public-asset URL. */
+  background-color: #0b0814;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   background: var(--landing-bg);
 }
 
+/* Video fades in over the poster background once it can play, then composites
+   on its own layer for smooth playback. */
+.ck-hero-video {
+  opacity: 0;
+  transition: opacity 1s ease;
+  will-change: opacity;
+  transform: translateZ(0);
+}
+.ck-hero-video.is-ready {
+  opacity: 1;
+}
+/* Honor reduced-motion: skip the video entirely and keep the static poster. */
+@media (prefers-reduced-motion: reduce) {
+  .ck-hero-video { display: none; }
+}
+
 .ck-hero-overlay {
-  background: color-mix(in srgb, var(--landing-bg) 55%, transparent);
+  /* Deep-violet wash to match the purple-desert footage and keep text legible */
+  background: color-mix(in srgb, #160e2e 52%, transparent);
 }
 
 .ck-hero-gradient {
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--landing-bg) 40%, transparent),
+    color-mix(in srgb, #160e2e 45%, transparent),
     transparent,
-    color-mix(in srgb, var(--landing-bg) 80%, transparent)
+    var(--landing-bg)
   );
 }
 
