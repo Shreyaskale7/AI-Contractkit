@@ -268,7 +268,7 @@ const GenerateContract = () => {
                     <div style={{ display: 'grid', gap: 8, marginBottom: 4 }}>
                       {result.riskAnalysis.map((risk, index) => (
                         <details key={index} style={{ border: '1px solid var(--saas-border, #e2e8f0)', borderRadius: 8, padding: '8px 12px', fontSize: 13 }}>
-                          <summary style={{ cursor: 'pointer', fontWeight: 600, color: risk.riskLevel === 'high' ? '#dc2626' : risk.riskLevel === 'medium' ? '#d97706' : '#2563eb' }}>
+                          <summary style={{ cursor: 'pointer', fontWeight: 600, color: risk.riskLevel === 'high' ? '#dc2626' : risk.riskLevel === 'medium' ? '#d97706' : '#7c3aed' }}>
                             ⚠️ {risk.riskLevel?.toUpperCase()} RISK{risk.originalText ? `: ${risk.originalText.substring(0, 60)}${risk.originalText.length > 60 ? '…' : ''}` : ''}
                           </summary>
                           <div className="text-secondary" style={{ marginTop: 8, lineHeight: 1.6 }}>

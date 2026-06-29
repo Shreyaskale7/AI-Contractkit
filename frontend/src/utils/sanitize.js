@@ -8,7 +8,7 @@ export const sanitizeHtml = (html) =>
 const riskColors = {
   high: 'rgba(239,68,68,0.18)',
   medium: 'rgba(245,158,11,0.18)',
-  low: 'rgba(59,130,246,0.14)',
+  low: 'rgba(139,92,246,0.16)',
 };
 
 // Wrap each risky clause found in the contract HTML in a highlighted <mark>.

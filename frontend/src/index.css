@@ -84,9 +84,9 @@
   --saas-input-bg: #ffffff;
   --saas-border: #e4e4e7;
   --saas-border-emphasis: #d4d4d8;
-  --saas-accent: #3b82f6;
-  --saas-accent-hover: #2563eb;
-  --saas-accent-glow: rgba(59, 130, 246, 0.12);
+  --saas-accent: #7c3aed;
+  --saas-accent-hover: #6d28d9;
+  --saas-accent-glow: rgba(124, 58, 237, 0.12);
   --saas-text: #09090b;
   --saas-text-secondary: #52525b;
   --saas-text-muted: #a1a1aa;
@@ -94,7 +94,7 @@
   --saas-warning: #d97706;
   --saas-danger: #dc2626;
   --saas-draft: #a1a1aa;
-  --saas-nav-active-bg: #eff6ff;
+  --saas-nav-active-bg: #f3f0ff;
   --saas-scrollbar-track: #e4e4e7;
   --saas-scrollbar-thumb: #a1a1aa;
 
@@ -132,16 +132,16 @@
 }
 
 [data-theme="dark"] {
-  --saas-bg: #0a0a0a;
-  --saas-sidebar: #0d0d0d;
-  --saas-surface: #111111;
-  --saas-surface-hover: #141414;
-  --saas-input-bg: #0f0f0f;
-  --saas-border: #1a1a1a;
-  --saas-border-emphasis: #262626;
-  --saas-accent: #3b82f6;
-  --saas-accent-hover: #2563eb;
-  --saas-accent-glow: rgba(59, 130, 246, 0.15);
+  --saas-bg: #0b0814;
+  --saas-sidebar: #0e0a1a;
+  --saas-surface: #120e20;
+  --saas-surface-hover: #171228;
+  --saas-input-bg: #130f22;
+  --saas-border: #241b38;
+  --saas-border-emphasis: #322748;
+  --saas-accent: #8b5cf6;
+  --saas-accent-hover: #7c3aed;
+  --saas-accent-glow: rgba(139, 92, 246, 0.18);
   --saas-text: #ffffff;
   --saas-text-secondary: #a1a1aa;
   --saas-text-muted: #52525b;
@@ -149,9 +149,9 @@
   --saas-warning: #f59e0b;
   --saas-danger: #ef4444;
   --saas-draft: #3f3f46;
-  --saas-nav-active-bg: #0f1929;
-  --saas-scrollbar-track: #1a1a1a;
-  --saas-scrollbar-thumb: #3f3f46;
+  --saas-nav-active-bg: #1c1336;
+  --saas-scrollbar-track: #241b38;
+  --saas-scrollbar-thumb: #3f3357;
 
   --color-surface-muted: var(--saas-bg);
   --color-surface-raised: var(--saas-surface);
@@ -932,7 +932,7 @@ body {
 }
 
 .landing-shimmer {
-  background: linear-gradient(90deg, var(--color-surface-strong) 0%, #38bdf8 50%, var(--color-surface-strong) 100%);
+  background: linear-gradient(90deg, var(--color-surface-strong) 0%, #c4b5fd 50%, var(--color-surface-strong) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -1216,15 +1216,15 @@ body {
 }
 
 .btn-accent-soft {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(139, 92, 246, 0.12);
   color: var(--saas-accent);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.22);
   border-radius: 8px;
   transition: all 0.15s ease;
 }
 
 .btn-accent-soft:hover {
-  background: rgba(59, 130, 246, 0.16);
+  background: rgba(139, 92, 246, 0.18);
   filter: none;
 }
 
@@ -2191,7 +2191,7 @@ body {
   font-weight: 500;
   background: var(--saas-accent-glow);
   color: var(--saas-accent);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.22);
 }
 
 .modal-overlay {

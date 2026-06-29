@@ -39,11 +39,11 @@ const GenerateProposal = () => {
           <title>${result.title}</title>
           <style>
             body { font-family: Georgia, serif; max-width: 800px; margin: 40px auto; padding: 40px; color: #1a1a1a; }
-            h1 { color: #3b82f6; font-size: 24px; margin-bottom: 4px; }
-            h2 { font-size: 16px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #3b82f6; padding-bottom: 6px; margin-top: 28px; color: #3b82f6; }
+            h1 { color: #7c3aed; font-size: 24px; margin-bottom: 4px; }
+            h2 { font-size: 16px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #7c3aed; padding-bottom: 6px; margin-top: 28px; color: #7c3aed; }
             p { line-height: 1.8; text-align: justify; }
             table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-            th { background: #3b82f6; color: white; padding: 10px; text-align: left; }
+            th { background: #7c3aed; color: white; padding: 10px; text-align: left; }
             td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
             tr:nth-child(even) { background: #f8fafc; }
           </style>

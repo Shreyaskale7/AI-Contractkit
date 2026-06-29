@@ -131,7 +131,7 @@ const ContractView = () => {
               </h3>
               <div style={{ display: 'grid', gap: 10 }}>
                 {contract.riskAnalysis.map((risk, idx) => (
-                  <div key={idx} style={{ background: 'white', padding: 12, borderRadius: 6, borderLeft: `4px solid ${risk.riskLevel === 'high' ? '#ef4444' : risk.riskLevel === 'medium' ? '#f59e0b' : '#3b82f6'}` }}>
+                  <div key={idx} style={{ background: 'white', padding: 12, borderRadius: 6, borderLeft: `4px solid ${risk.riskLevel === 'high' ? '#ef4444' : risk.riskLevel === 'medium' ? '#f59e0b' : '#8b5cf6'}` }}>
                     <div style={{ fontSize: 12, fontWeight: 600, color: '#1e293b', marginBottom: 4, textTransform: 'uppercase' }}>
                       {risk.riskLevel} RISK
                     </div>
