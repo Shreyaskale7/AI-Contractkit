@@ -5,11 +5,19 @@ const Invoice = require('../models/Invoice');
 const createInvoice = async (req, res) => {
   const { clientId, items, dueDate, currency, notes } = req.body;
 
-  // Calculate totals automatically
-  const processedItems = items.map(item => ({
-    ...item,
-    total: item.quantity * item.rate
-  }));
+  if (!clientId || !Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ message: 'A client and at least one line item are required' });
+  }
+  if (!dueDate) {
+    return res.status(400).json({ message: 'A due date is required' });
+  }
+
+  // Calculate totals automatically, coercing numbers so bad input can't produce NaN
+  const processedItems = items.map(item => {
+    const quantity = Number(item.quantity) || 0;
+    const rate = Number(item.rate) || 0;
+    return { description: String(item.description || ''), quantity, rate, total: quantity * rate };
+  });
 
   const totalAmount = processedItems.reduce((sum, item) => sum + item.total, 0);
 

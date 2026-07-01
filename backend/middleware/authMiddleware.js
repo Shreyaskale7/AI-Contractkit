@@ -17,6 +17,11 @@ const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1]; // extract token
       const decoded = jwt.verify(token, process.env.JWT_SECRET); // verify + decode
       req.user = await User.findById(decoded.id).select('-passwordHash'); // attach user to request
+      // Token is valid but the user may have been deleted — guard so handlers
+      // don't crash on req.user._id.
+      if (!req.user) {
+        return res.status(401).json({ message: 'Not authorized, user no longer exists' });
+      }
       next(); // ✅ valid — continue to the route handler
     } catch (err) {
       return res.status(401).json({ message: 'Token invalid or expired' });

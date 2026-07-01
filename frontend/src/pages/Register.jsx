@@ -45,7 +45,7 @@ const Register = () => {
   return (
     <AuthLayout
       title="Start for free"
-      subtitle="Join thousands of freelancers who run their business on AI ContractKit."
+      subtitle="Create your account and run your freelance business on AI ContractKit."
       perks={[
         { title: 'Generate contracts', desc: 'AI-drafted agreements in seconds' },
         { title: 'Track invoices', desc: 'Monitor payment status in real time' },

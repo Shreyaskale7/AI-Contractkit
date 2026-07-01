@@ -77,10 +77,10 @@ const Dashboard = () => {
     .toUpperCase();
 
   const statCards = [
-    { label: 'TOTAL REVENUE', value: `₹${stats.revenue.toLocaleString()}`, meta: 'Paid invoices', trend: '▲ 12%', up: true },
-    { label: 'PENDING REVENUE', value: `₹${stats.pending.toLocaleString()}`, meta: 'Awaiting payment', trend: '▼ 3%', up: false },
-    { label: 'ACTIVE CLIENTS', value: stats.clients, meta: 'Current relationships', trend: '▲ 8%', up: true },
-    { label: 'SIGNED CONTRACTS', value: stats.signed, meta: `of ${stats.contracts}`, trend: '▲ 5%', up: true },
+    { label: 'TOTAL REVENUE', value: `₹${stats.revenue.toLocaleString()}`, meta: 'Paid invoices' },
+    { label: 'PENDING REVENUE', value: `₹${stats.pending.toLocaleString()}`, meta: 'Awaiting payment' },
+    { label: 'ACTIVE CLIENTS', value: stats.clients, meta: 'Current relationships' },
+    { label: 'SIGNED CONTRACTS', value: stats.signed, meta: `of ${stats.contracts}` },
   ];
 
   return (
@@ -142,9 +142,6 @@ const Dashboard = () => {
                   <div className="dash-metric-value">{item.value}</div>
                   <div className="dash-metric-footer">
                     <span>{item.meta}</span>
-                    <span className={item.up ? 'dash-trend dash-trend--up' : 'dash-trend dash-trend--down'}>
-                      {item.trend}
-                    </span>
                   </div>
                 </div>
               ))}

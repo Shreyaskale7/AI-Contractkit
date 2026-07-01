@@ -181,15 +181,16 @@ const ContractKitLanding = () => {
       {/* Security */}
       <section id="security" className="landing-band landing-section !py-0">
         <div className="landing-container py-[100px]">
-          <SectionHeader eyebrow="Security" title="Enterprise-grade security" />
+          <SectionHeader eyebrow="Security" title="Security by design" />
           <ScrollFade delay={0.1}>
             <div className="landing-band-inner">
               <p className="landing-body mb-8 max-w-2xl">
-                JWT authentication, encrypted sessions, audit logging, and AI compliance scanning—built for
-                operators who take client data seriously.
+                JWT authentication, bcrypt-hashed passwords, strict per-user data isolation, rate limiting,
+                sanitized rendering, and AI risk scanning on every contract—built for people who take
+                client data seriously.
               </p>
               <Link to="/security" className="landing-btn-secondary">
-                View security dashboard
+                See how we protect your data
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>

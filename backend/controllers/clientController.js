@@ -10,15 +10,24 @@ const getClients = async (req, res) => {
 // POST /api/clients
 const createClient = async (req, res) => {
   const { name, email, phone, company } = req.body;
+  if (!name || !email) {
+    return res.status(400).json({ message: 'Client name and email are required' });
+  }
   const client = await Client.create({ userId: req.user._id, name, email, phone, company });
   res.status(201).json(client);
 };
 
 // PUT /api/clients/:id
 const updateClient = async (req, res) => {
+  // Whitelist updatable fields so a crafted request can't reassign userId
+  // (which would hand the client to another account) or set arbitrary fields.
+  const { name, email, phone, company, status } = req.body;
+  const updates = { name, email, phone, company, status };
+  Object.keys(updates).forEach((k) => updates[k] === undefined && delete updates[k]);
+
   const client = await Client.findOneAndUpdate(
     { _id: req.params.id, userId: req.user._id }, // ensures ownership
-    req.body, { new: true }
+    updates, { new: true, runValidators: true }
   );
   if (!client) return res.status(404).json({ message: 'Client not found' });
   res.json(client);

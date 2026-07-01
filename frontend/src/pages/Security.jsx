@@ -1,39 +1,44 @@
 import PageShell from '../components/PageShell';
 import { Link } from 'react-router-dom';
 
-const securityFeatures = [
-  { icon: '🔐', title: 'End-to-end encryption', desc: 'All contract data encrypted at rest and in transit using AES-256.' },
-  { icon: '✓', title: 'Audit logging', desc: 'Every view, edit, and signature event is logged with timestamp and actor.' },
-  { icon: '◈', title: 'Access controls', desc: 'Role-based permissions for operators and authenticated users.' },
-  { icon: '▦', title: 'Compliance scanning', desc: 'AI flags risky clauses, missing terms, and jurisdiction conflicts.' },
+// Real, implemented security measures — no fabricated data or overstated claims.
+const securityControls = [
+  { icon: '🔑', title: 'Authentication', desc: 'Access is protected by JSON Web Tokens (JWT). Passwords are hashed with bcrypt and never stored in plaintext.' },
+  { icon: '🧍', title: 'Per-user data isolation', desc: 'Every contract, client, and invoice query is scoped to your account. Users cannot read or modify each other\'s data.' },
+  { icon: '🖋️', title: 'Tamper-evident signatures', desc: 'Each signature is stored with a timestamp, IP address, and a SHA-256 hash of the exact contract content, so any later change is detectable.' },
+  { icon: '🧼', title: 'Input sanitization', desc: 'All AI- and client-generated HTML is sanitized with DOMPurify before rendering, preventing script injection (XSS).' },
+  { icon: '🚦', title: 'Rate limiting', desc: 'Authentication and AI endpoints are rate-limited to guard against brute-force attempts and abuse.' },
+  { icon: '⚠️', title: 'AI risk scanning', desc: 'Every generated contract is analyzed for risky or missing clauses and flagged by severity before you send it.' },
 ];
 
-const auditLog = [
-  { action: 'Contract signed', user: 'Sarah M.', time: '2 min ago', status: 'success' },
-  { action: 'Login from new device', user: 'Marcus C.', time: '18 min ago', status: 'info' },
-  { action: 'Invoice payment received', user: 'System', time: '1 hr ago', status: 'success' },
-  { action: 'Failed login attempt', user: 'Unknown IP', time: '3 hr ago', status: 'warning' },
+// Things we're honest about not having yet.
+const roadmap = [
+  'httpOnly-cookie sessions (currently JWT in browser storage)',
+  'Certified e-signatures with a downloadable, independently verifiable certificate',
+  'Encryption at rest for stored contract content',
+  'An exportable, per-account audit trail',
+];
+
+const facts = [
+  { label: 'Authentication', value: 'JWT' },
+  { label: 'Password storage', value: 'bcrypt' },
+  { label: 'Signature integrity', value: 'SHA-256' },
+  { label: 'Data isolation', value: 'Per-user' },
 ];
 
 const Security = () => (
   <PageShell
     title="Security"
-    subtitle="Monitor compliance, access controls, and audit activity for your AI ContractKit workspace."
+    subtitle="How AI ContractKit protects your account and your clients' data."
     actions={
-      <Link to="/profile" className="btn btn-secondary">Security settings</Link>
+      <Link to="/profile" className="btn btn-secondary">Account settings</Link>
     }
   >
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16, marginBottom: 32 }}>
-      {[
-        { label: 'Security score', value: '98%', meta: 'Last scan: today' },
-        { label: 'Active sessions', value: '2', meta: 'This account' },
-        { label: 'Audit events', value: '847', meta: 'Last 30 days' },
-        { label: 'Open alerts', value: '0', meta: 'All clear' },
-      ].map((item, i) => (
+      {facts.map((item, i) => (
         <div key={item.label} className={`card card-stat page-enter stagger-${i + 1}`}>
           <div className="card-stat-label">{item.label}</div>
           <div className="card-stat-value">{item.value}</div>
-          <div className="text-secondary" style={{ fontSize: 13 }}>{item.meta}</div>
         </div>
       ))}
     </div>
@@ -44,7 +49,7 @@ const Security = () => (
           <div style={{ fontSize: 16, fontWeight: 600 }}>Security controls</div>
         </div>
         <div style={{ padding: '8px 0' }}>
-          {securityFeatures.map((f, i) => (
+          {securityControls.map((f, i) => (
             <div key={f.title} className={`row-divider${i % 2 === 0 ? ' row-alt' : ''}`} style={{ padding: '18px 24px', display: 'flex', gap: 16, alignItems: 'flex-start' }}>
               <span style={{ fontSize: 20, lineHeight: 1 }} aria-hidden="true">{f.icon}</span>
               <div>
@@ -58,24 +63,20 @@ const Security = () => (
 
       <div className="card" style={{ overflow: 'hidden' }}>
         <div className="card-header">
-          <div style={{ fontSize: 16, fontWeight: 600 }}>Recent audit log</div>
-          <span className="badge badge-signed">Live</span>
+          <div style={{ fontSize: 16, fontWeight: 600 }}>On the roadmap</div>
         </div>
-        <div>
-          {auditLog.map((entry, i) => (
-            <div key={i} className={`row-divider${i % 2 === 0 ? ' row-alt' : ''}`} style={{ padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 500 }}>{entry.action}</div>
-                <div className="text-secondary" style={{ fontSize: 12, marginTop: 4 }}>{entry.user}</div>
+        <div style={{ padding: '20px 24px' }}>
+          <p className="text-secondary" style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>
+            Being transparent about what isn't built yet. These hardening steps are planned:
+          </p>
+          <div style={{ display: 'grid', gap: 12 }}>
+            {roadmap.map((item) => (
+              <div key={item} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 13, lineHeight: 1.5 }}>
+                <span style={{ color: 'var(--saas-accent)', flexShrink: 0 }} aria-hidden="true">○</span>
+                <span>{item}</span>
               </div>
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <span className={`badge badge-${entry.status === 'success' ? 'signed' : entry.status === 'warning' ? 'sent' : 'draft'}`}>
-                  {entry.status}
-                </span>
-                <div className="text-secondary" style={{ fontSize: 11, marginTop: 6 }}>{entry.time}</div>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

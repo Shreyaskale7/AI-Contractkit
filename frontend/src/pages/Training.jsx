@@ -66,9 +66,9 @@ const Training = () => {
         <h2 className="section-title">How smart learning works</h2>
         <div className="step-grid">
           {[
-            { step: '01', icon: '📤', title: 'Upload contracts', desc: 'Add thousands of real contracts to train on. The more the better.' },
-            { step: '02', icon: '🔍', title: 'AI learns patterns', desc: 'System analyzes clause patterns, payment terms, and your writing style.' },
-            { step: '03', icon: '⚡', title: 'Better generation', desc: 'Every new contract uses your library as reference for personalized output.' },
+            { step: '01', icon: '📤', title: 'Add your contracts', desc: 'Index your past contracts into a searchable library. The more you add, the better the references.' },
+            { step: '02', icon: '🔍', title: 'Patterns indexed', desc: 'Each contract is categorized and indexed by clause patterns using TF-IDF similarity.' },
+            { step: '03', icon: '⚡', title: 'Grounded generation', desc: 'New contracts reuse clause patterns from your most similar past agreements.' },
           ].map(({ step, icon, title, desc }) => (
             <div key={step} className="step-card">
               <div className="step-card-label">STEP {step}</div>
@@ -101,9 +101,9 @@ const Training = () => {
       </div>
 
       <div className="card card-body">
-        <h2 className="section-title">Step 2 — Upload training contracts (JSON)</h2>
+        <h2 className="section-title">Step 2 — Add contracts to your library (JSON)</h2>
         <p className="text-secondary" style={{ fontSize: 13, marginBottom: 16 }}>
-          Paste thousands of contracts as JSON to train the model. Format: array of objects with title and content fields.
+          Paste past contracts as JSON to index them for reference. Format: array of objects with title and content fields.
         </p>
         <div className="code-block">
           {`[
