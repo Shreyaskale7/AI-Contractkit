@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { getAnalytics } from '../services/api';
 
-const COLORS = ['#0497f9', '#0d9488', '#d97706', '#dc2626', '#15355c'];
+const COLORS = ['#8b5cf6', '#c084fc', '#e879f9', '#a78bfa', '#6d28d9'];
 
 const Analytics = () => {
   const [data, setData] = useState(null);

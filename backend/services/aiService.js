@@ -64,7 +64,7 @@ const draftContract = async ({ input, mode = 'brief' }) => {
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ],
-    max_tokens: 3500,
+    max_tokens: 6000,
     temperature: 0.3,
   });
 
@@ -81,7 +81,7 @@ const draftContractStream = async ({ input, mode = 'brief', onDelta }) => {
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ],
-    max_tokens: 3500,
+    max_tokens: 6000,
     temperature: 0.3,
     stream: true,
   });
@@ -142,7 +142,7 @@ const editContract = async ({ content, systemPrompt, userPrompt }) => {
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ],
-    max_tokens: 3500,
+    max_tokens: 6000,
     temperature: 0.2,
   });
   return stripFences(completion.choices[0].message.content);

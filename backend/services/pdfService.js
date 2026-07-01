@@ -9,7 +9,7 @@ const PDFDocument = require('pdfkit');
 // ── Palette & metrics ──────────────────────────────────────────────
 const INK = '#1f2937';
 const MUTED = '#6b7280';
-const ACCENT = '#4338ca';
+const ACCENT = '#7c3aed';
 const LINE = '#d8dce4';
 const SOFT = '#f3f4f6';
 const MARGIN = 56;
