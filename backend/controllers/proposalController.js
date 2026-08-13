@@ -68,7 +68,8 @@ Make it compelling and professional.`
 const getProposals = async (req, res) => {
   const proposals = await Proposal.find({ userId: req.user._id })
     .populate('clientId', 'name email company')
-    .sort('-createdAt');
+    .sort('-createdAt')
+    .limit(500);
   res.json(proposals);
 };
 
@@ -85,10 +86,13 @@ const getProposalById = async (req, res) => {
 // PUT /api/proposals/:id/status
 const updateProposalStatus = async (req, res) => {
   const { status } = req.body;
+  if (!['draft', 'sent', 'accepted', 'rejected'].includes(status)) {
+    return res.status(400).json({ message: 'Invalid proposal status' });
+  }
   const proposal = await Proposal.findOneAndUpdate(
     { _id: req.params.id, userId: req.user._id },
     { status },
-    { new: true }
+    { new: true, runValidators: true }
   );
   if (!proposal) return res.status(404).json({ message: 'Proposal not found' });
   res.json(proposal);

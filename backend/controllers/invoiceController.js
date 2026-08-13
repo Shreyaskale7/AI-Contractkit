@@ -43,17 +43,21 @@ const createInvoice = async (req, res) => {
 const getInvoices = async (req, res) => {
   const invoices = await Invoice.find({ userId: req.user._id })
     .populate('clientId', 'name email company')
-    .sort('-createdAt');
+    .sort('-createdAt')
+    .limit(500);
   res.json(invoices);
 };
 
 // PUT /api/invoices/:id/status — mark as paid/overdue
 const updateInvoiceStatus = async (req, res) => {
   const { status } = req.body;
+  if (!['unpaid', 'paid', 'overdue'].includes(status)) {
+    return res.status(400).json({ message: 'Invalid invoice status' });
+  }
   const invoice = await Invoice.findOneAndUpdate(
     { _id: req.params.id, userId: req.user._id },
     { status },
-    { new: true }
+    { new: true, runValidators: true }
   );
   if (!invoice) return res.status(404).json({ message: 'Invoice not found' });
   res.json(invoice);

@@ -52,7 +52,7 @@ const getTemplates = async (req, res) => {
   const filter = { userId: req.user._id };
   if (category && category !== 'All') filter.category = category;
 
-  const templates = await Template.find(filter).sort('-createdAt');
+  const templates = await Template.find(filter).sort('-createdAt').limit(500);
   res.json(templates);
 };
 

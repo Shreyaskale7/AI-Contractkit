@@ -3,7 +3,7 @@ const Client = require('../models/Client');
 
 // GET /api/clients — get only THIS user's clients
 const getClients = async (req, res) => {
-  const clients = await Client.find({ userId: req.user._id }).sort('-createdAt');
+  const clients = await Client.find({ userId: req.user._id }).sort('-createdAt').limit(500);
   res.json(clients);
 };
 

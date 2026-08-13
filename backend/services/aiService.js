@@ -4,6 +4,11 @@ const groq = require('../config/groq');
 
 const MODEL = 'llama-3.3-70b-versatile';
 
+// Lightweight observability: log latency + token usage for every AI call so we
+// can see how fast and how expensive each feature is.
+const logAI = (label, startedAt, usage) =>
+  console.log(`[groq] ${label} ${Date.now() - startedAt}ms tokens=${usage?.total_tokens ?? 'n/a'}`);
+
 const CONTRACT_HTML_STRUCTURE = `
 Use this EXACT structure:
 - <div class="contract-header"> for the title and parties section
@@ -58,6 +63,7 @@ Be extremely specific with amounts, dates, and terms mentioned in the requiremen
 
 const draftContract = async ({ input, mode = 'brief' }) => {
   const { systemPrompt, userPrompt } = buildDraftPrompts({ input, mode });
+  const startedAt = Date.now();
   const completion = await groq.chat.completions.create({
     model: MODEL,
     messages: [
@@ -67,6 +73,7 @@ const draftContract = async ({ input, mode = 'brief' }) => {
     max_tokens: 6000,
     temperature: 0.3,
   });
+  logAI('draftContract', startedAt, completion.usage);
 
   return stripFences(completion.choices[0].message.content);
 };
@@ -86,6 +93,7 @@ const draftContractStream = async ({ input, mode = 'brief', onDelta }) => {
     stream: true,
   });
 
+  const startedAt = Date.now();
   let full = '';
   for await (const chunk of stream) {
     const delta = chunk.choices?.[0]?.delta?.content || '';
@@ -94,6 +102,7 @@ const draftContractStream = async ({ input, mode = 'brief', onDelta }) => {
       onDelta?.(delta);
     }
   }
+  logAI('draftContractStream', startedAt);
   return stripFences(full);
 };
 

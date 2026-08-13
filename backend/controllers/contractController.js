@@ -113,7 +113,8 @@ const generateFromNotes = async (req, res) => {
 const getContracts = async (req, res) => {
   const contracts = await Contract.find({ userId: req.user._id })
     .populate('clientId', 'name email company')
-    .sort('-createdAt');
+    .sort('-createdAt')
+    .limit(500);
   res.json(contracts);
 };
 

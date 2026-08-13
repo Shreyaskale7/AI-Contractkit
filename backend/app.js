@@ -45,8 +45,14 @@ app.get('/', (req, res) => res.send('AI ContractKit API is running ✅'));
 // GLOBAL ERROR HANDLER — express-async-errors forwards thrown async errors here
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err.message);
-  res.status(err.status || 500).json({ message: err.message || 'Something went wrong' });
+  console.error('Unhandled error:', err.stack || err.message);
+  const status = err.status || 500;
+  // 4xx messages are intentional and safe to show; hide internal 5xx details
+  // from clients in production to avoid leaking implementation specifics.
+  const message = status < 500
+    ? (err.message || 'Request failed')
+    : (process.env.NODE_ENV === 'production' ? 'Something went wrong' : err.message);
+  res.status(status).json({ message });
 });
 
 module.exports = app;
