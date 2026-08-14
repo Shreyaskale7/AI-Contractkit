@@ -109,6 +109,7 @@ export const deleteInvoice       = (id)          => API.delete(`/invoices/${id}`
 export const getAnalytics = () => API.get('/analytics');
 // Add these 2 lines at the bottom
 export const getPublicContract = (token) => API.get(`/contracts/public/${token}`);
+export const verifyContract    = (token) => API.get(`/contracts/verify/${token}`);
 export const getELI5Contract   = (token) => API.get(`/contracts/public/${token}/eli5`);
 export const signContract      = (token, data) => API.post(`/contracts/sign/${token}`, data);
 export const addClientComment  = (token, data) => API.post(`/contracts/public/${token}/comments`, data);

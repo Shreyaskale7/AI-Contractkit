@@ -24,6 +24,7 @@ const Analytics = lazy(() => import('./pages/Analytics'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Security = lazy(() => import('./pages/Security'));
 const PublicContract = lazy(() => import('./pages/PublicContract'));
+const VerifyContract = lazy(() => import('./pages/VerifyContract'));
 const ScopeCreepDefender = lazy(() => import('./pages/ScopeCreepDefender'));
 
 const RouteFallback = () => (
@@ -45,6 +46,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/signup" element={<Register />} />
               <Route path="/contract/public/:token" element={<PublicContract />} />
+              <Route path="/verify/:token" element={<VerifyContract />} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/clients"   element={<ProtectedRoute><Clients /></ProtectedRoute>} />
               <Route path="/contracts" element={<ProtectedRoute><Contracts /></ProtectedRoute>} />

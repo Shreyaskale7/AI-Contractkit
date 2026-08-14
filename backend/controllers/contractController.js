@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const { draftContract, draftContractStream, analyzeRisks, editContract } = require('../services/aiService');
 const { analyzeScopeCreep } = require('../services/scopeService');
 const { summarizeDefenses } = require('../utils/scopeDefense');
+const { hashContent, verifyContractIntegrity } = require('../utils/signatureVerify');
 const emailService = require('../services/emailService');
 const { streamContractPdf } = require('../services/pdfService');
 
@@ -200,8 +201,9 @@ const signContract = async (req, res) => {
     return res.status(410).json({ message: 'This contract has expired and can no longer be signed.' });
   }
 
-  // Calculate content hash
-  const contentHash = crypto.createHash('sha256').update(contract.content).digest('hex');
+  // Record a SHA-256 hash of the exact content being signed, so the document
+  // can later be independently verified (see GET /verify/:token).
+  const contentHash = hashContent(contract.content);
   const userAgent = req.headers['user-agent'] || 'Unknown';
 
   contract.signature = {
@@ -261,6 +263,27 @@ const getPublicContract = async (req, res) => {
   }
 
   res.json(publicView(contract));
+};
+
+// GET /api/contracts/verify/:token — public integrity check.
+// Anyone holding the link can re-verify that a signed contract has not been
+// altered since signing, without needing an account.
+const verifyContract = async (req, res) => {
+  const contract = await Contract.findOne({ publicToken: req.params.token })
+    .populate('userId', 'name businessName')
+    .populate('clientId', 'name company');
+
+  if (!contract) {
+    return res.status(404).json({ status: 'not_found', verified: false, message: 'No contract found for this verification link.' });
+  }
+
+  const result = verifyContractIntegrity(contract);
+  res.json({
+    ...result,
+    title: contract.title,
+    provider: contract.userId?.businessName || contract.userId?.name || '',
+    client: contract.clientId?.company || contract.clientId?.name || '',
+  });
 };
 
 // POST /api/contracts/:id/refine
@@ -460,6 +483,7 @@ module.exports = {
   getContractById,
   getPublicContract,
   signContract,
+  verifyContract,
   deleteContract,
   refineContract,
   revertContract,

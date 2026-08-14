@@ -257,7 +257,7 @@ const drawExecution = (doc, contract, provider, client) => {
 };
 
 // Boxed electronic-signature certificate (tamper-evidence record).
-const drawCertificate = (doc, sig) => {
+const drawCertificate = (doc, sig, verifyUrl) => {
   if (!sig?.data) return;
   ensureSpace(doc, 150);
   doc.moveDown(0.6);
@@ -271,6 +271,7 @@ const drawCertificate = (doc, sig) => {
     ['Device', (sig.userAgent || '—').slice(0, 90)],
     ['Content hash (SHA-256)', sig.contentHash || '—'],
   ];
+  if (verifyUrl) lines.push(['Verify online', verifyUrl]);
   doc.font('Helvetica').fontSize(8.5);
   let bodyH = 22;
   for (const [, v] of lines) bodyH += doc.heightOfString(v, { width: contentW(doc) - pad * 2 - 120 }) + 4;
@@ -342,7 +343,10 @@ const streamContractPdf = (contract, res) => {
   }
 
   drawExecution(doc, contract, provider, client);
-  drawCertificate(doc, contract.signature);
+  // Anyone can re-verify the document's integrity at this URL.
+  const appUrl = (process.env.APP_URL || '').replace(/\/$/, '');
+  const verifyUrl = appUrl && contract.publicToken ? `${appUrl}/verify/${contract.publicToken}` : '';
+  drawCertificate(doc, contract.signature, verifyUrl);
 
   addFooters(doc, contract, provider);
   doc.end();

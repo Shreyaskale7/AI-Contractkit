@@ -168,6 +168,58 @@ test('a signed contract cannot be refined (409, before any AI call)', async () =
   assert.equal(res.status, 409);
 });
 
+// ─────────────── Public signature verification ───────────────
+
+test('verify endpoint reports a signed, unmodified contract as valid', async () => {
+  const { hashContent } = require('../utils/signatureVerify');
+  const c = await Contract.create({
+    userId: userA.id,
+    clientId: contractA.clientId,
+    title: 'Verifiable Contract',
+    content: '<p>agreed terms</p>',
+    status: 'signed',
+    publicToken: 'tok_verify_ok',
+    signature: {
+      data: 'data:image/png;base64,AAAA',
+      signedAt: new Date(),
+      contentHash: hashContent('<p>agreed terms</p>'),
+      signerName: 'Acme Corp',
+    },
+  });
+  const res = await request(app).get(`/api/contracts/verify/${c.publicToken}`);
+  assert.equal(res.status, 200);
+  assert.equal(res.body.status, 'valid');
+  assert.equal(res.body.verified, true);
+});
+
+test('verify endpoint detects a contract altered after signing', async () => {
+  const { hashContent } = require('../utils/signatureVerify');
+  const c = await Contract.create({
+    userId: userA.id,
+    clientId: contractA.clientId,
+    title: 'Tampered Contract',
+    content: '<p>ALTERED terms</p>',
+    status: 'signed',
+    publicToken: 'tok_verify_bad',
+    signature: {
+      data: 'data:image/png;base64,AAAA',
+      signedAt: new Date(),
+      contentHash: hashContent('<p>original terms</p>'), // hash of what was signed
+      signerName: 'Acme Corp',
+    },
+  });
+  const res = await request(app).get(`/api/contracts/verify/${c.publicToken}`);
+  assert.equal(res.status, 200);
+  assert.equal(res.body.status, 'tampered');
+  assert.equal(res.body.verified, false);
+});
+
+test('verify endpoint 404s for an unknown token', async () => {
+  const res = await request(app).get('/api/contracts/verify/does_not_exist');
+  assert.equal(res.status, 404);
+  assert.equal(res.body.verified, false);
+});
+
 // ─────────────── Scope-defense endpoints ───────────────
 
 test('logging a scope defense and reading the summary is owner-scoped', async () => {

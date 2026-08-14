@@ -9,6 +9,7 @@ const {
   getContractById,
   getPublicContract,
   signContract,
+  verifyContract,
   deleteContract,
   refineContract,
   revertContract,
@@ -31,6 +32,7 @@ const {
 
 // ── Public routes (no auth needed) ──
 router.get('/public/:token',  publicReadLimiter, getPublicContract);
+router.get('/verify/:token',  publicReadLimiter, verifyContract);
 router.get('/public/:token/eli5', eli5Limiter, getELI5Contract);
 router.get('/public/:token/pdf', publicReadLimiter, downloadPublicContractPdf);
 router.post('/sign/:token',   publicWriteLimiter, signContract);
