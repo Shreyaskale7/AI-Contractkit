@@ -26,7 +26,7 @@ AI ContractKit goes beyond plain document generation. It uses Groq's hosted LLaM
 
 ## 💻 Technology stack
 
-* **Frontend:** React 19 (Vite), React Router, TanStack Query, Tailwind CSS, Recharts, Lucide icons.
+* **Frontend:** React 19 (Vite), React Router, Axios, Tailwind CSS, Recharts, Lucide icons.
 * **Backend:** Node.js, Express.
 * **Database:** MongoDB & Mongoose.
 * **AI engine:** Groq API (LLaMA 3.3 70B) for low-latency inference, with token streaming over SSE.
